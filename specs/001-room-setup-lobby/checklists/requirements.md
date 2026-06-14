@@ -32,5 +32,7 @@
 ## Notes
 
 - All items pass. Spec is ready for `/speckit-plan`.
-- Edge cases documented: in-game room join, case-insensitive codes, polling failure.
-- Assumptions section explicitly bounds scope (no max room size, no auth, case normalisation).
+- Clarification session 2026-06-14: 3 questions answered — polling failure UX (inline banner), room code format (4 uppercase letters), player disconnect behaviour (no removal until game starts).
+- FR-011 added for polling failure banner; FR-002 updated with 4-letter code format; Assumptions updated with disconnect/no-leave behaviour.
+- Edge cases documented: in-game room join, case-insensitive codes, polling failure (resolved).
+- Assumptions section explicitly bounds scope (no max room size, no auth, case normalisation, no disconnect detection).

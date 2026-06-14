@@ -76,14 +76,14 @@ Once at least 2 players are in the lobby, the host sees a "Start Game" button. N
 
 - What happens when a player tries to join a room that is already in-game (not in lobby status)?
 - How does the system handle a player submitting the join form with a code in lowercase vs uppercase?
-- What is shown if the polling request fails temporarily (network hiccup)?
+- **Polling failure**: If a lobby poll request fails, an inline error banner MUST appear immediately. It clears automatically on the next successful poll.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
 - **FR-001**: The system MUST assign the "host" role to the first participant who creates a room.
-- **FR-002**: The system MUST generate a unique room code for each newly created room.
+- **FR-002**: The system MUST generate a unique 4-letter uppercase room code (e.g., `KART`) for each newly created room.
 - **FR-003**: Players MUST be able to join a room by entering its code and a player name.
 - **FR-004**: The system MUST reject join attempts with an invalid, non-existent, or empty room code with a descriptive error message.
 - **FR-005**: The system MUST reject create or join attempts where the player name is empty, with a descriptive validation message shown before any request is sent.
@@ -92,10 +92,11 @@ Once at least 2 players are in the lobby, the host sees a "Start Game" button. N
 - **FR-008**: The "Start Game" control MUST be inactive (disabled or hidden) when fewer than 2 participants are present.
 - **FR-009**: Each room MUST be fully isolated: participants in one room MUST NOT see or affect participants in another room.
 - **FR-010**: Room codes MUST be treated case-insensitively so that a code entered in lowercase matches the same room as one entered in uppercase.
+- **FR-011**: When a lobby poll request fails, the system MUST display an inline error banner to the affected participant immediately. The banner MUST clear automatically on the next successful poll.
 
 ### Key Entities
 
-- **Room**: Represents a game session. Has a unique code, a status (lobby / in-game), and a list of participants.
+- **Room**: Represents a game session. Has a unique 4-letter uppercase code, a status (lobby / in-game), and a list of participants.
 - **Participant**: A player in a room. Has a name, a unique identifier, a join timestamp, and a flag indicating whether they are the host.
 
 ## Success Criteria *(mandatory)*
@@ -109,6 +110,14 @@ Once at least 2 players are in the lobby, the host sees a "Start Game" button. N
 - **SC-005**: The "Start Game" button is visible only to the host and only when 2 or more participants are present.
 - **SC-006**: Rooms are fully isolated: no participant or state data leaks between two simultaneously active rooms.
 
+## Clarifications
+
+### Session 2026-06-14
+
+- Q: What is shown if a lobby poll request fails temporarily? → A: Show an inline error banner immediately on the first failed poll; clear it automatically on the next successful poll.
+- Q: What format should the room code take? → A: 4 uppercase letters (e.g., `KART`); easy to read aloud.
+- Q: What happens when a player closes their browser or navigates away while in the lobby? → A: The participant remains in the list until the game starts or the server restarts; there is no disconnect detection or timeout removal.
+
 ## Assumptions
 
 - Room codes are case-insensitive; the system normalises them to uppercase internally.
@@ -118,3 +127,4 @@ Once at least 2 players are in the lobby, the host sees a "Start Game" button. N
 - The polling interval target is ~2 seconds; minor variance (e.g., up to ±500ms) is acceptable.
 - Room data is not persisted across service restarts; all rooms are temporary for the duration of a session.
 - No player authentication exists; the participant's identity is tied to the session they received when creating or joining.
+- There is no disconnect detection or timeout-based removal. A participant who closes their browser remains in the lobby list until the game starts or the server restarts. No "Leave Room" action is required for this scenario.
