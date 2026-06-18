@@ -14,3 +14,8 @@ precheck-results/
 
 .vscode/
 .vite/
+.claude
+.idea
+.specify
+package*.json
+*/package-lock.json

@@ -9,7 +9,7 @@ function now() {
 }
 
 function generateCode() {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ";
   let code = "";
 
   for (let index = 0; index < 4; index += 1) {
@@ -33,11 +33,12 @@ function displayName(name?: string) {
   return name || "Player";
 }
 
-function createParticipant(name?: string): Participant {
+function createParticipant(name?: string, isHost = false): Participant {
   return {
     id: randomUUID(),
     name: displayName(name),
-    joinedAt: now()
+    joinedAt: now(),
+    isHost
   };
 }
 
@@ -50,7 +51,7 @@ export function listWords() {
 }
 
 export function createRoom(playerName?: string) {
-  const participant = createParticipant(playerName);
+  const participant = createParticipant(playerName, true);
   const room: Room = {
     code: generateUniqueCode(),
     status: "lobby",
@@ -68,13 +69,13 @@ export function createRoom(playerName?: string) {
 }
 
 export function joinRoom(code: string, playerName?: string) {
-  const room = rooms.get(code);
+  const room = rooms.get(code.toUpperCase());
 
   if (!room) {
     return null;
   }
 
-  const participant = createParticipant(playerName);
+  const participant = createParticipant(playerName, false);
   room.participants.push(participant);
   room.updatedAt = now();
   rooms.set(room.code, room);
@@ -83,6 +84,30 @@ export function joinRoom(code: string, playerName?: string) {
     room: cloneRoom(room),
     participantId: participant.id
   };
+}
+
+export function startGame(code: string, participantId: string): RoomSnapshot {
+  const room = rooms.get(code.toUpperCase());
+
+  if (!room) {
+    throw new Error("404: Room not found");
+  }
+
+  const caller = room.participants.find((p) => p.id === participantId);
+
+  if (!caller || !caller.isHost) {
+    throw new Error("403: Forbidden — only the host can start the game");
+  }
+
+  if (room.participants.length < 2) {
+    throw new Error("400: Need at least 2 players to start the game");
+  }
+
+  room.status = "in-game";
+  room.updatedAt = now();
+  rooms.set(room.code, room);
+
+  return toRoomSnapshot(cloneRoom(room));
 }
 
 export function getRoom(code: string) {

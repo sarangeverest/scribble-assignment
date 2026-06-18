@@ -89,8 +89,9 @@ RoomSessionResponse {
 1. Exactly one participant in a room has `isHost: true` at all times.
 2. The room code is immutable after creation.
 3. `status` transitions are monotonic: `"lobby"` → `"in-game"` only.
-4. A room with `status: "in-game"` rejects new join attempts (out of scope for this feature,
-   but the `joinRoom` service will return `null` for non-lobby rooms).
+4. Joining a room with `status: "in-game"` is **out of scope** for this feature. The `joinRoom`
+   service does not guard against room status; this is a known limitation deferred to a future
+   feature. The frontend does not expose a join-game path that would trigger this scenario.
 
 ---
 

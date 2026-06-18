@@ -4,9 +4,10 @@ import {
   HttpError,
   joinRoomSchema,
   roomCodeParamsSchema,
-  roomViewerQuerySchema
+  roomViewerQuerySchema,
+  startGameSchema
 } from "./schemas.js";
-import { createRoom, getRoom, joinRoom, toRoomSnapshot } from "../services/roomStore.js";
+import { createRoom, getRoom, joinRoom, startGame, toRoomSnapshot } from "../services/roomStore.js";
 
 export function createRoomsRouter() {
   const router = Router();
@@ -41,6 +42,23 @@ export function createRoomsRouter() {
       });
     } catch (error) {
       next(error);
+    }
+  });
+
+  router.post("/:code/start", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = startGameSchema.parse(request.body);
+      const snapshot = startGame(code, participantId);
+      response.json({ room: snapshot });
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith("403")) {
+        next(new HttpError(403, error.message.replace(/^403:\s*/, "")));
+      } else if (error instanceof Error && error.message.startsWith("400")) {
+        next(new HttpError(400, error.message.replace(/^400:\s*/, "")));
+      } else {
+        next(error);
+      }
     }
   });
 

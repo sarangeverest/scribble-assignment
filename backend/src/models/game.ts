@@ -1,10 +1,11 @@
 export type ParticipantRole = "drawer" | "guesser";
-export type RoomStatus = "lobby";
+export type RoomStatus = "lobby" | "in-game";
 
 export interface Participant {
   id: string;
   name: string;
   joinedAt: string;
+  isHost: boolean;
 }
 
 export interface Room {
