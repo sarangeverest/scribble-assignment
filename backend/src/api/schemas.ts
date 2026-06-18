@@ -1,11 +1,17 @@
 import { z } from "zod";
 
+export const playerNameSchema = z
+  .string()
+  .trim()
+  .min(1, "Name cannot be empty")
+  .max(20, "Name must be 20 characters or fewer");
+
 export const createRoomSchema = z.object({
-  playerName: z.string().min(1)
+  playerName: playerNameSchema
 });
 
 export const joinRoomSchema = z.object({
-  playerName: z.string().min(1)
+  playerName: playerNameSchema
 });
 
 export const roomCodeParamsSchema = z.object({

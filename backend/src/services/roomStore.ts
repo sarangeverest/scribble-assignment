@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { Participant, Room, RoomSnapshot } from "../models/game.js";
-import { STARTER_ROLES, STARTER_WORDS } from "../seed/starterData.js";
+import { STARTER_WORDS } from "../seed/starterData.js";
 
 const rooms = new Map<string, Room>();
 
@@ -103,11 +103,16 @@ export function startGame(code: string, participantId: string): RoomSnapshot {
     throw new Error("400: Need at least 2 players to start the game");
   }
 
+  if ((STARTER_WORDS as readonly string[]).length === 0) {
+    throw new Error("400: No words available to start the game");
+  }
+
+  room.currentRound = { drawerId: caller.id, word: STARTER_WORDS[0], status: "active" };
   room.status = "in-game";
   room.updatedAt = now();
   rooms.set(room.code, room);
 
-  return toRoomSnapshot(cloneRoom(room));
+  return toRoomSnapshot(cloneRoom(room), participantId);
 }
 
 export function getRoom(code: string) {
@@ -122,13 +127,17 @@ export function saveRoom(room: Room) {
 }
 
 export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
-  void viewerParticipantId;
+  const drawerId = room.currentRound?.drawerId ?? null;
+  const secretWord =
+    viewerParticipantId && viewerParticipantId === drawerId
+      ? room.currentRound!.word
+      : undefined;
 
   return {
     code: room.code,
     status: room.status,
     participants: room.participants.map((participant) => ({ ...participant })),
-    availableWords: listWords(),
-    roles: [...STARTER_ROLES]
+    drawerId,
+    ...(secretWord !== undefined && { secretWord })
   };
 }

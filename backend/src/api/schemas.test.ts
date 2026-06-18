@@ -27,4 +27,26 @@ describe("schemas", () => {
   it("roomCodeParamsSchema rejects missing code", () => {
     expect(() => roomCodeParamsSchema.parse({})).toThrow();
   });
+
+  // ── US1: Player Name Validation ─────────────────────────────────────────────
+
+  it("createRoomSchema trims surrounding whitespace from playerName", () => {
+    const result = createRoomSchema.parse({ playerName: "  Alice  " });
+
+    expect(result.playerName).toBe("Alice");
+  });
+
+  it("createRoomSchema rejects whitespace-only playerName", () => {
+    expect(() => createRoomSchema.parse({ playerName: "  " })).toThrow();
+  });
+
+  it("createRoomSchema rejects playerName longer than 20 characters", () => {
+    expect(() => createRoomSchema.parse({ playerName: "A".repeat(21) })).toThrow();
+  });
+
+  it("createRoomSchema accepts playerName of exactly 20 characters", () => {
+    const result = createRoomSchema.parse({ playerName: "A".repeat(20) });
+
+    expect(result.playerName).toHaveLength(20);
+  });
 });

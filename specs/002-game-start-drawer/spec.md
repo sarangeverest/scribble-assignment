@@ -62,7 +62,7 @@ At round start, a secret word is selected deterministically from the starter wor
 ### Edge Cases
 
 - What happens when a player's name consists entirely of Unicode whitespace? — Treated as whitespace-only; rejected with the same message as a blank name.
-- What happens if the starter word list is empty? — Round start is blocked; a game cannot begin without available words.
+- What happens if the starter word list is empty? — Round start is blocked with a clear error; a game cannot begin without available words. Implemented as a defensive guard in `startGame` (FR-003 scope).
 - Can a player change their name after joining but before the game starts? — Out of scope; names are fixed on join.
 - What if two participants join with the same trimmed name? — Allowed; names are display labels only, not unique identifiers (participants are identified by ID).
 - What happens when a player tries to join a room that is already in-game? — Out of scope; late-join behavior is deferred to a future feature.
@@ -86,7 +86,7 @@ At round start, a secret word is selected deterministically from the starter wor
 
 ### Key Entities
 
-- **Participant**: A player in a room, identified by a unique ID. Has a trimmed display name, a role (`drawer` or `guesser`), and a host flag.
+- **Participant**: A player in a room, identified by a unique ID. Has a trimmed display name and a host flag. Role is derived — a participant is the drawer if their ID matches the room's `drawerId`; all others are guessers. No explicit role field is stored on the participant record.
 - **Round**: A single drawing turn. Has a designated drawer, a secret word, and a status (active/ended).
 - **Room Snapshot**: The view of room state exposed per-participant — the public snapshot omits the secret word; the drawer's snapshot includes it.
 

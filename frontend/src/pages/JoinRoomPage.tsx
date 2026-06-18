@@ -18,6 +18,11 @@ export function JoinRoomPage() {
       return;
     }
 
+    if (playerName.trim().length > 20) {
+      setError("Name must be 20 characters or fewer");
+      return;
+    }
+
     if (!roomCode.trim()) {
       setError("Room code is required");
       return;
@@ -47,6 +52,7 @@ export function JoinRoomPage() {
             value={playerName}
             onChange={(event) => setPlayerName(event.target.value)}
             placeholder="Second pencil"
+            maxLength={20}
           />
         </label>
 

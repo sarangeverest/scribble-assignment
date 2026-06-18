@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createRoom, joinRoom, startGame } from "./roomStore.js";
+import { createRoom, joinRoom, startGame, getRoom, toRoomSnapshot } from "./roomStore.js";
 
 describe("roomStore", () => {
   it("createRoom returns a room with a 4-character uppercase code", () => {
@@ -76,5 +76,95 @@ describe("roomStore", () => {
     const snapshot = startGame(room.code, hostId);
 
     expect(snapshot.status).toBe("in-game");
+  });
+
+  // ── US2: Host as drawer at round start ──────────────────────────────────────
+
+  it("startGame sets currentRound.drawerId to host id", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+
+    expect(getRoom(room.code)!.currentRound?.drawerId).toBe(hostId);
+  });
+
+  it("startGame sets currentRound.word to first starter word (rocket)", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+
+    expect(getRoom(room.code)!.currentRound?.word).toBe("rocket");
+  });
+
+  it("startGame sets currentRound.status to active", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+
+    expect(getRoom(room.code)!.currentRound?.status).toBe("active");
+  });
+
+  it("toRoomSnapshot returns drawerId matching host when in-game", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+
+    const inGameRoom = getRoom(room.code)!;
+    expect(toRoomSnapshot(inGameRoom, hostId).drawerId).toBe(hostId);
+  });
+
+  it("toRoomSnapshot returns drawerId null when room is in lobby", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const lobbyRoom = getRoom(room.code)!;
+
+    expect(toRoomSnapshot(lobbyRoom, hostId).drawerId).toBeNull();
+  });
+
+  it("toRoomSnapshot returns a drawerId that is not the guesser's id", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const joinResult = joinRoom(room.code, "Bob")!;
+    const guesserId = joinResult.participantId;
+    void hostId;
+    startGame(room.code, hostId);
+
+    const inGameRoom = getRoom(room.code)!;
+    expect(toRoomSnapshot(inGameRoom, guesserId).drawerId).not.toBe(guesserId);
+  });
+
+  // ── US3: Secret word visible only to drawer ──────────────────────────────────
+
+  it("toRoomSnapshot includes secretWord for the drawer", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+
+    const inGameRoom = getRoom(room.code)!;
+    expect(toRoomSnapshot(inGameRoom, hostId).secretWord).toBe("rocket");
+  });
+
+  it("toRoomSnapshot omits secretWord for a guesser", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const joinResult = joinRoom(room.code, "Bob")!;
+    const guesserId = joinResult.participantId;
+    startGame(room.code, hostId);
+
+    const inGameRoom = getRoom(room.code)!;
+    expect(toRoomSnapshot(inGameRoom, guesserId).secretWord).toBeUndefined();
+  });
+
+  it("toRoomSnapshot omits secretWord when no viewerParticipantId provided", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+
+    const inGameRoom = getRoom(room.code)!;
+    expect(toRoomSnapshot(inGameRoom).secretWord).toBeUndefined();
+  });
+
+  it("toRoomSnapshot omits secretWord in lobby (no active round)", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const lobbyRoom = getRoom(room.code)!;
+
+    expect(toRoomSnapshot(lobbyRoom, hostId).secretWord).toBeUndefined();
   });
 });

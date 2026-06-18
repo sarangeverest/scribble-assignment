@@ -17,6 +17,11 @@ export function CreateRoomPage() {
       return;
     }
 
+    if (playerName.trim().length > 20) {
+      setError("Name must be 20 characters or fewer");
+      return;
+    }
+
     try {
       setError(null);
       await roomStore.createRoom(playerName.trim());
@@ -41,6 +46,7 @@ export function CreateRoomPage() {
             value={playerName}
             onChange={(event) => setPlayerName(event.target.value)}
             placeholder="Sketch captain"
+            maxLength={20}
           />
         </label>
         {error ? <p className="form__error">{error}</p> : null}
