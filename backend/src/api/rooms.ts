@@ -1,15 +1,17 @@
 import { Router } from "express";
 import {
   createRoomSchema,
+  endRoundSchema,
   HttpError,
   joinRoomSchema,
+  restartGameSchema,
   roomCodeParamsSchema,
   roomViewerQuerySchema,
   startGameSchema,
   submitGuessSchema,
   updateDrawingSchema
 } from "./schemas.js";
-import { createRoom, getRoom, joinRoom, startGame, submitGuess, toRoomSnapshot, updateCanvas } from "../services/roomStore.js";
+import { createRoom, endRound, getRoom, joinRoom, restartGame, startGame, submitGuess, toRoomSnapshot, updateCanvas } from "../services/roomStore.js";
 
 export function createRoomsRouter() {
   const router = Router();
@@ -89,6 +91,44 @@ export function createRoomsRouter() {
       const { participantId, canvasData } = updateDrawingSchema.parse(request.body);
       updateCanvas(code, participantId, canvasData);
       response.json({ ok: true });
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith("404")) {
+        next(new HttpError(404, error.message.replace(/^404:\s*/, "")));
+      } else if (error instanceof Error && error.message.startsWith("400")) {
+        next(new HttpError(400, error.message.replace(/^400:\s*/, "")));
+      } else if (error instanceof Error && error.message.startsWith("403")) {
+        next(new HttpError(403, error.message.replace(/^403:\s*/, "")));
+      } else {
+        next(error);
+      }
+    }
+  });
+
+  router.post("/:code/end", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = endRoundSchema.parse(request.body);
+      const snapshot = endRound(code, participantId);
+      response.json({ room: snapshot });
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith("404")) {
+        next(new HttpError(404, error.message.replace(/^404:\s*/, "")));
+      } else if (error instanceof Error && error.message.startsWith("400")) {
+        next(new HttpError(400, error.message.replace(/^400:\s*/, "")));
+      } else if (error instanceof Error && error.message.startsWith("403")) {
+        next(new HttpError(403, error.message.replace(/^403:\s*/, "")));
+      } else {
+        next(error);
+      }
+    }
+  });
+
+  router.post("/:code/restart", (request, response, next) => {
+    try {
+      const { code } = roomCodeParamsSchema.parse(request.params);
+      const { participantId } = restartGameSchema.parse(request.body);
+      const snapshot = restartGame(code, participantId);
+      response.json({ room: snapshot });
     } catch (error) {
       if (error instanceof Error && error.message.startsWith("404")) {
         next(new HttpError(404, error.message.replace(/^404:\s*/, "")));

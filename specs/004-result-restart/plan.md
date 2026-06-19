@@ -239,7 +239,7 @@ Two additions:
 
 ### `frontend/src/pages/ResultsPage.tsx` *(new)*
 
-`ResultPanel` is an **inline function component** defined at the top of `ResultsPage.tsx` — it is NOT a separate file in `components/`.
+`ResultPanel` already exists at `frontend/src/components/ResultPanel.tsx` (shared with `GamePage`). `ResultsPage` imports it from there — no new file needed.
 
 ```
 On mount (useEffect — guard):

@@ -36,6 +36,14 @@ export const updateDrawingSchema = z.object({
   canvasData: z.string()
 });
 
+export const endRoundSchema = z.object({
+  participantId: z.string().min(1)
+});
+
+export const restartGameSchema = z.object({
+  participantId: z.string().min(1)
+});
+
 export class HttpError extends Error {
   statusCode: number;
 

@@ -1,4 +1,4 @@
-export type RoomStatus = "lobby" | "in-game";
+export type RoomStatus = "lobby" | "in-game" | "results";
 
 export interface Guess {
   participantId: string;

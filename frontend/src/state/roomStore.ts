@@ -114,6 +114,16 @@ class RoomStore {
   async updateCanvas(code: string, participantId: string, canvasData: string) {
     await api.updateCanvas(code, participantId, canvasData);
   }
+
+  async endRound(code: string, participantId: string) {
+    const response = await api.endRound(code, participantId);
+    this.setRoomSnapshot(response.room);
+  }
+
+  async restartGame(code: string, participantId: string) {
+    const response = await api.restartGame(code, participantId);
+    this.setRoomSnapshot(response.room);
+  }
 }
 
 const RoomStoreContext = createContext<RoomStore | null>(null);

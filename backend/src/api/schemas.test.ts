@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createRoomSchema, joinRoomSchema, roomCodeParamsSchema, submitGuessSchema, updateDrawingSchema } from "./schemas.js";
+import { createRoomSchema, endRoundSchema, joinRoomSchema, restartGameSchema, roomCodeParamsSchema, submitGuessSchema, updateDrawingSchema } from "./schemas.js";
 
 describe("schemas", () => {
   it("createRoomSchema accepts a valid body with playerName", () => {
@@ -94,5 +94,35 @@ describe("schemas", () => {
 
   it("submitGuessSchema rejects empty participantId", () => {
     expect(() => submitGuessSchema.parse({ participantId: "", guess: "rocket" })).toThrow();
+  });
+
+  // ── US1: endRoundSchema ──────────────────────────────────────────────────────
+
+  it("endRoundSchema accepts valid participantId", () => {
+    const result = endRoundSchema.parse({ participantId: "uuid-1" });
+    expect(result.participantId).toBe("uuid-1");
+  });
+
+  it("endRoundSchema rejects empty participantId", () => {
+    expect(() => endRoundSchema.parse({ participantId: "" })).toThrow();
+  });
+
+  it("endRoundSchema rejects missing participantId", () => {
+    expect(() => endRoundSchema.parse({})).toThrow();
+  });
+
+  // ── US2: restartGameSchema ────────────────────────────────────────────────────
+
+  it("restartGameSchema accepts valid participantId", () => {
+    const result = restartGameSchema.parse({ participantId: "uuid-2" });
+    expect(result.participantId).toBe("uuid-2");
+  });
+
+  it("restartGameSchema rejects empty participantId", () => {
+    expect(() => restartGameSchema.parse({ participantId: "" })).toThrow();
+  });
+
+  it("restartGameSchema rejects missing participantId", () => {
+    expect(() => restartGameSchema.parse({})).toThrow();
   });
 });

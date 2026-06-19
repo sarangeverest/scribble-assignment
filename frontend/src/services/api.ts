@@ -16,7 +16,7 @@ export interface Participant {
 
 export interface RoomSnapshot {
   code: string;
-  status: "lobby" | "in-game";
+  status: "lobby" | "in-game" | "results";
   participants: Participant[];
   drawerId: string | null;
   secretWord?: string;
@@ -98,5 +98,17 @@ export const api = {
         body: JSON.stringify({ participantId, canvasData })
       }
     );
+  },
+  endRound(code: string, participantId: string) {
+    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/end`, {
+      method: "POST",
+      body: JSON.stringify({ participantId })
+    });
+  },
+  restartGame(code: string, participantId: string) {
+    return request<{ room: RoomSnapshot }>(`/rooms/${encodeURIComponent(code)}/restart`, {
+      method: "POST",
+      body: JSON.stringify({ participantId })
+    });
   }
 };

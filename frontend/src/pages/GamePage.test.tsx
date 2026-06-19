@@ -22,8 +22,14 @@ vi.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate
 }));
 
+const mockStore = vi.hoisted(() => ({
+  fetchRoom: vi.fn().mockResolvedValue(undefined),
+  endRound: vi.fn().mockResolvedValue(undefined),
+  updateCanvas: vi.fn().mockResolvedValue(undefined)
+}));
+
 vi.mock("../state/roomStore.js", () => ({
-  useRoomStore: () => ({}),
+  useRoomStore: () => mockStore,
   useRoomState: () => roomStateRef
 }));
 
@@ -183,5 +189,36 @@ describe("GamePage", () => {
     await act(async () => { root.render(createElement(GamePage)); });
 
     expect(container.querySelector(".guess-form")).toBeNull();
+  });
+
+  // ── US1: End Round button + /results redirect ─────────────────────────────────
+
+  it("shows End Round button for host", async () => {
+    roomStateRef.participantId = "host-id";
+    roomStateRef.room = makeInGameRoom({ drawerId: "host-id" });
+
+    await act(async () => { root.render(createElement(GamePage)); });
+
+    const buttons = Array.from(container.querySelectorAll("button"));
+    expect(buttons.some((b) => b.textContent?.toLowerCase().includes("end round"))).toBe(true);
+  });
+
+  it("does not show End Round button for non-host", async () => {
+    roomStateRef.participantId = "guest-id";
+    roomStateRef.room = makeInGameRoom({ drawerId: "host-id" });
+
+    await act(async () => { root.render(createElement(GamePage)); });
+
+    const buttons = Array.from(container.querySelectorAll("button"));
+    expect(buttons.some((b) => b.textContent?.toLowerCase().includes("end round"))).toBe(false);
+  });
+
+  it("navigates to /results when room status changes to results", async () => {
+    roomStateRef.participantId = "host-id";
+    roomStateRef.room = makeInGameRoom({ status: "results" });
+
+    await act(async () => { root.render(createElement(GamePage)); });
+
+    expect(mockNavigate).toHaveBeenCalledWith("/results", { replace: true });
   });
 });

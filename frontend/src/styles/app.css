@@ -655,6 +655,48 @@ input {
   font-weight: 500;
 }
 
+/* Results page */
+.results-page {
+  display: grid;
+  gap: 32px;
+}
+
+.results-page__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.results-page__title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+
+.results-page__word {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.results-page__columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.results-page__waiting {
+  color: var(--ink-soft);
+  font-size: 1rem;
+  margin: 0;
+}
+
 @media (max-width: 720px) {
   .app-shell {
     padding: 24px 16px;
@@ -666,8 +708,13 @@ input {
 
   .hero,
   .placeholder-page,
-  .game-page {
+  .game-page,
+  .results-page {
     padding: 24px 16px;
+  }
+
+  .results-page__columns {
+    grid-template-columns: 1fr;
   }
 
   .button {

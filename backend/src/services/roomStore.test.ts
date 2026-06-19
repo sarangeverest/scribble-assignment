@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createRoom, joinRoom, startGame, getRoom, toRoomSnapshot, updateCanvas, submitGuess } from "./roomStore.js";
+import { createRoom, joinRoom, startGame, getRoom, toRoomSnapshot, updateCanvas, submitGuess, endRound, restartGame } from "./roomStore.js";
 
 describe("roomStore", () => {
   it("createRoom returns a room with a 4-character uppercase code", () => {
@@ -354,5 +354,133 @@ describe("roomStore", () => {
     expect(isCorrect).toBe(true);
     const guesser = snapshot.participants.find((p) => p.id === guestResult.participantId)!;
     expect(guesser.score).toBe(100);
+  });
+
+  // ── US1: endRound ─────────────────────────────────────────────────────────────
+
+  it("endRound throws 404 when room does not exist", () => {
+    expect(() => endRound("ZZZZ", "any-id")).toThrow(/404/);
+  });
+
+  it("endRound throws 400 when room status is not in-game", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    expect(() => endRound(room.code, hostId)).toThrow(/400/);
+  });
+
+  it("endRound throws 403 when caller is not the host", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    expect(() => endRound(room.code, guestResult.participantId)).toThrow(/403/);
+  });
+
+  it("endRound transitions room status to results", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    endRound(room.code, hostId);
+    expect(getRoom(room.code)!.status).toBe("results");
+  });
+
+  it("endRound preserves round data (word, guesses, canvasData)", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    submitGuess(room.code, guestResult.participantId, "banana");
+    updateCanvas(room.code, hostId, "data:image/png;base64,abc");
+    endRound(room.code, hostId);
+    const stored = getRoom(room.code)!;
+    expect(stored.currentRound?.word).toBe("rocket");
+    expect(stored.currentRound?.guesses).toHaveLength(1);
+    expect(stored.currentRound?.canvasData).toBe("data:image/png;base64,abc");
+  });
+
+  it("endRound snapshot exposes secretWord to all viewers", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    endRound(room.code, hostId);
+    const roomAfter = getRoom(room.code)!;
+    expect(toRoomSnapshot(roomAfter, guestResult.participantId).secretWord).toBe("rocket");
+    expect(toRoomSnapshot(roomAfter).secretWord).toBe("rocket");
+  });
+
+  it("endRound snapshot status is results", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    const snapshot = endRound(room.code, hostId);
+    expect(snapshot.status).toBe("results");
+  });
+
+  // ── US2: restartGame ──────────────────────────────────────────────────────────
+
+  it("restartGame throws 404 when room does not exist", () => {
+    expect(() => restartGame("ZZZZ", "any-id")).toThrow(/404/);
+  });
+
+  it("restartGame throws 400 when room status is not results", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    expect(() => restartGame(room.code, hostId)).toThrow(/400/);
+  });
+
+  it("restartGame throws 403 when caller is not the host", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    endRound(room.code, hostId);
+    expect(() => restartGame(room.code, guestResult.participantId)).toThrow(/403/);
+  });
+
+  it("restartGame transitions room status to lobby", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    endRound(room.code, hostId);
+    restartGame(room.code, hostId);
+    expect(getRoom(room.code)!.status).toBe("lobby");
+  });
+
+  it("restartGame clears currentRound", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    endRound(room.code, hostId);
+    restartGame(room.code, hostId);
+    expect(getRoom(room.code)!.currentRound).toBeUndefined();
+  });
+
+  it("restartGame preserves all participants", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    endRound(room.code, hostId);
+    restartGame(room.code, hostId);
+    expect(getRoom(room.code)!.participants).toHaveLength(2);
+  });
+
+  it("restartGame preserves participant scores", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    submitGuess(room.code, guestResult.participantId, "rocket");
+    endRound(room.code, hostId);
+    restartGame(room.code, hostId);
+    const guesser = getRoom(room.code)!.participants.find((p) => p.id === guestResult.participantId)!;
+    expect(guesser.score).toBe(100);
+  });
+
+  it("restartGame snapshot returns empty guesses and canvasData", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    endRound(room.code, hostId);
+    const snapshot = restartGame(room.code, hostId);
+    expect(snapshot.guesses).toEqual([]);
+    expect(snapshot.canvasData).toBe("");
+    expect(snapshot.drawerId).toBeNull();
+    expect(snapshot.secretWord).toBeUndefined();
   });
 });

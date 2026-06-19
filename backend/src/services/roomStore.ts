@@ -130,7 +130,9 @@ export function saveRoom(room: Room) {
 export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSnapshot {
   const drawerId = room.currentRound?.drawerId ?? null;
   const secretWord =
-    viewerParticipantId && viewerParticipantId === drawerId
+    room.status === "results"
+      ? room.currentRound?.word
+      : viewerParticipantId && viewerParticipantId === drawerId
       ? room.currentRound!.word
       : undefined;
 
@@ -143,6 +145,37 @@ export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSn
     canvasData: room.currentRound?.canvasData ?? "",
     ...(secretWord !== undefined && { secretWord })
   };
+}
+
+export function endRound(code: string, participantId: string): RoomSnapshot {
+  const room = rooms.get(code.toUpperCase());
+  if (!room) throw new Error("404: Room not found");
+  if (room.status !== "in-game" || !room.currentRound) throw new Error("400: No active round");
+
+  const caller = room.participants.find((p) => p.id === participantId);
+  if (!caller || !caller.isHost) throw new Error("403: Forbidden — only the host can end the round");
+
+  room.status = "results";
+  room.updatedAt = now();
+  rooms.set(room.code, room);
+
+  return toRoomSnapshot(cloneRoom(room));
+}
+
+export function restartGame(code: string, participantId: string): RoomSnapshot {
+  const room = rooms.get(code.toUpperCase());
+  if (!room) throw new Error("404: Room not found");
+  if (room.status !== "results") throw new Error("400: Room is not in results state");
+
+  const caller = room.participants.find((p) => p.id === participantId);
+  if (!caller || !caller.isHost) throw new Error("403: Forbidden — only the host can restart");
+
+  room.status = "lobby";
+  room.currentRound = undefined;
+  room.updatedAt = now();
+  rooms.set(room.code, room);
+
+  return toRoomSnapshot(cloneRoom(room));
 }
 
 export function submitGuess(

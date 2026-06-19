@@ -20,6 +20,12 @@ export function GamePage() {
   }, [navigate, room]);
 
   useEffect(() => {
+    if (room?.status === "results") {
+      navigate("/results", { replace: true });
+    }
+  }, [navigate, room?.status]);
+
+  useEffect(() => {
     const intervalId = setInterval(() => {
       store.fetchRoom();
     }, 2000);
@@ -27,6 +33,7 @@ export function GamePage() {
   }, [store]);
 
   const isDrawer = participantId !== null && participantId === room?.drawerId;
+  const isHost = room?.participants.some((p) => p.id === participantId && p.isHost) ?? false;
 
   const handleClear = useCallback(() => {
     const canvas = canvasRef.current;
@@ -159,6 +166,14 @@ export function GamePage() {
       </div>
 
       <div className="button-row">
+        {isHost && (
+          <button
+            className="button button--primary"
+            onClick={() => { if (room && participantId) store.endRound(room.code, participantId); }}
+          >
+            End Round
+          </button>
+        )}
         <button className="button button--secondary" onClick={() => navigate("/lobby")}>
           Exit Game
         </button>

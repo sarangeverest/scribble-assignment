@@ -22,8 +22,8 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T001 Add `"results"` to `RoomStatus` union type in `backend/src/models/game.ts`
-- [ ] T002 [P] Update `RoomStatus` type alias to include `"results"` in `frontend/src/services/api.ts`
+- [x] T001 Add `"results"` to `RoomStatus` union type in `backend/src/models/game.ts`
+- [x] T002 [P] Update `RoomStatus` type alias to include `"results"` in `frontend/src/services/api.ts`
 
 **Checkpoint**: Both packages compile with the updated type; TypeScript reports no errors.
 
@@ -37,22 +37,22 @@
 
 ### Tests for User Story 1 (RED — write first, verify failing)
 
-- [ ] T003 [US1] Write failing tests for `endRound` service (404/400/403/transitions-to-results/preserves-round-data/exposes-secretWord-for-all) in `backend/src/services/roomStore.test.ts`
-- [ ] T004 [P] [US1] Write failing tests for `endRoundSchema` (rejects empty participantId, accepts valid participantId) in `backend/src/api/schemas.test.ts`
-- [ ] T005 [P] [US1] Write failing tests for `ResultsPage` display (no-room guard, stays-on-results, in-game redirect, secretWord rendered, Scoreboard rendered, ResultPanel rendered, polls every 2000ms) in `frontend/src/pages/ResultsPage.test.tsx` — `ResultPanel` is an inline component defined in the same file as `ResultsPage`
-- [ ] T006 [P] [US1] Write failing tests for `GamePage`: navigates to `/results` when `room.status === "results"`, "End Round" button visible for host, hidden for non-host in `frontend/src/pages/GamePage.test.tsx`
+- [x] T003 [US1] Write failing tests for `endRound` service (404/400/403/transitions-to-results/preserves-round-data/exposes-secretWord-for-all) in `backend/src/services/roomStore.test.ts`
+- [x] T004 [P] [US1] Write failing tests for `endRoundSchema` (rejects empty participantId, accepts valid participantId) in `backend/src/api/schemas.test.ts`
+- [x] T005 [P] [US1] Write failing tests for `ResultsPage` display (no-room guard, stays-on-results, in-game redirect, secretWord rendered, Scoreboard rendered, ResultPanel rendered, polls every 2000ms) in `frontend/src/pages/ResultsPage.test.tsx` — `ResultPanel` is the existing shared component from `frontend/src/components/ResultPanel.tsx`
+- [x] T006 [P] [US1] Write failing tests for `GamePage`: navigates to `/results` when `room.status === "results"`, "End Round" button visible for host, hidden for non-host in `frontend/src/pages/GamePage.test.tsx`
 
 ### Implementation for User Story 1 (GREEN)
 
-- [ ] T007 [US1] Implement `endRound` function and update `toRoomSnapshot` to expose `secretWord` for all viewers when `room.status === "results"` in `backend/src/services/roomStore.ts`
-- [ ] T008 [P] [US1] Add `endRoundSchema` (`z.object({ participantId: z.string().min(1) })`) to `backend/src/api/schemas.ts`
-- [ ] T009 [US1] Add `POST /:code/end` route handler (parse `endRoundSchema`, call `endRound`, return `{ room: snapshot }`) in `backend/src/api/rooms.ts`
-- [ ] T010 [US1] Add `endRound(code, participantId)` API call (`POST /rooms/:code/end`) in `frontend/src/services/api.ts`
-- [ ] T011 [P] [US1] Add `endRound(code, participantId)` store method (calls `api.endRound`, then `this.setRoomSnapshot`) in `frontend/src/state/roomStore.ts`
-- [ ] T012 [US1] Add `"results"` status redirect (`navigate("/results", { replace: true })`) and "End Round" host button (calls `store.endRound`) to `frontend/src/pages/GamePage.tsx`
-- [ ] T013 [US1] Implement `ResultsPage` component: polling `useEffect` (2000ms, clearInterval on unmount), guard redirect (`!room → /`), status redirect (`"in-game" → /game`), display of `room.secretWord` in a `<Card>`, `<Scoreboard participants={room.participants} />`, `<ResultPanel guesses={room.guesses} />` in `frontend/src/pages/ResultsPage.tsx` — define `ResultPanel` as an inline function component at the top of this same file (not a separate file); renders guesses most-recent-first with submitter name and correct/incorrect indicator
-- [ ] T014 [US1] Add `/results` route (`<Route path="/results" element={<ResultsPage />} />`) in `frontend/src/routes/index.tsx`
-- [ ] T015 [P] [US1] Add ResultsPage CSS classes (`.results-page`, `.results-page__header`, `.results-page__title`, `.results-page__word`, `.results-page__columns`, `.results-page__waiting`) in `frontend/src/styles/app.css`
+- [x] T007 [US1] Implement `endRound` function and update `toRoomSnapshot` to expose `secretWord` for all viewers when `room.status === "results"` in `backend/src/services/roomStore.ts`
+- [x] T008 [P] [US1] Add `endRoundSchema` (`z.object({ participantId: z.string().min(1) })`) to `backend/src/api/schemas.ts`
+- [x] T009 [US1] Add `POST /:code/end` route handler (parse `endRoundSchema`, call `endRound`, return `{ room: snapshot }`) in `backend/src/api/rooms.ts`
+- [x] T010 [US1] Add `endRound(code, participantId)` API call (`POST /rooms/:code/end`) in `frontend/src/services/api.ts`
+- [x] T011 [P] [US1] Add `endRound(code, participantId)` store method (calls `api.endRound`, then `this.setRoomSnapshot`) in `frontend/src/state/roomStore.ts`
+- [x] T012 [US1] Add `"results"` status redirect (`navigate("/results", { replace: true })`) and "End Round" host button (calls `store.endRound`) to `frontend/src/pages/GamePage.tsx`
+- [x] T013 [US1] Implement `ResultsPage` component: polling `useEffect` (2000ms, clearInterval on unmount), guard redirect (`!room → /`), status redirect (`"in-game" → /game`), display of `room.secretWord` in a `<Card>`, `<Scoreboard participants={room.participants} />`, `<ResultPanel guesses={room.guesses} />` in `frontend/src/pages/ResultsPage.tsx` — import `ResultPanel` from the existing `../components/ResultPanel` (shared with GamePage; already renders most-recent-first with submitter name and correct/incorrect indicator)
+- [x] T014 [US1] Add `/results` route (`<Route path="/results" element={<ResultsPage />} />`) in `frontend/src/routes/index.tsx`
+- [x] T015 [P] [US1] Add ResultsPage CSS classes (`.results-page`, `.results-page__header`, `.results-page__title`, `.results-page__word`, `.results-page__columns`, `.results-page__waiting`) in `frontend/src/styles/app.css`
 
 **Checkpoint**: After T015, the end-round flow is fully functional. Host sees results screen with secret word. Non-host tabs auto-redirect and see the same data plus "Waiting for host to restart…" text (not yet interactive).
 
@@ -66,18 +66,18 @@
 
 ### Tests for User Story 2 (RED — write first, verify failing)
 
-- [ ] T016 [US2] Write failing tests for `restartGame` service (404/400/403/transitions-to-lobby/clears-currentRound/preserves-participants-and-scores) in `backend/src/services/roomStore.test.ts`
-- [ ] T017 [P] [US2] Write failing tests for `restartGameSchema` (rejects empty participantId, accepts valid participantId) in `backend/src/api/schemas.test.ts`
-- [ ] T018 [US2] Write failing tests for `ResultsPage` restart flow ("Back to Lobby" button shown for host, hidden for non-host, waiting message for non-host, calls `store.restartGame` on click, navigates to `/lobby` when `room.status === "lobby"`) in `frontend/src/pages/ResultsPage.test.tsx`
+- [x] T016 [US2] Write failing tests for `restartGame` service (404/400/403/transitions-to-lobby/clears-currentRound/preserves-participants-and-scores) in `backend/src/services/roomStore.test.ts`
+- [x] T017 [P] [US2] Write failing tests for `restartGameSchema` (rejects empty participantId, accepts valid participantId) in `backend/src/api/schemas.test.ts`
+- [x] T018 [US2] Write failing tests for `ResultsPage` restart flow ("Back to Lobby" button shown for host, hidden for non-host, waiting message for non-host, calls `store.restartGame` on click, navigates to `/lobby` when `room.status === "lobby"`) in `frontend/src/pages/ResultsPage.test.tsx`
 
 ### Implementation for User Story 2 (GREEN)
 
-- [ ] T019 [US2] Implement `restartGame` function (guards: 404/400/403, sets `room.status = "lobby"`, clears `room.currentRound = undefined`) in `backend/src/services/roomStore.ts`
-- [ ] T020 [P] [US2] Add `restartGameSchema` (`z.object({ participantId: z.string().min(1) })`) to `backend/src/api/schemas.ts`
-- [ ] T021 [US2] Add `POST /:code/restart` route handler (parse `restartGameSchema`, call `restartGame`, return `{ room: snapshot }`) in `backend/src/api/rooms.ts`
-- [ ] T022 [US2] Add `restartGame(code, participantId)` API call (`POST /rooms/:code/restart`) in `frontend/src/services/api.ts`
-- [ ] T023 [P] [US2] Add `restartGame(code, participantId)` store method (calls `api.restartGame`, then `this.setRoomSnapshot`) in `frontend/src/state/roomStore.ts`
-- [ ] T024 [US2] Extend `ResultsPage`: add "Back to Lobby" `<button>` for host (calls `store.restartGame`), waiting message `<p>` for non-host, and `"lobby"` status redirect (`navigate("/lobby", { replace: true })`) in `frontend/src/pages/ResultsPage.tsx`
+- [x] T019 [US2] Implement `restartGame` function (guards: 404/400/403, sets `room.status = "lobby"`, clears `room.currentRound = undefined`) in `backend/src/services/roomStore.ts`
+- [x] T020 [P] [US2] Add `restartGameSchema` (`z.object({ participantId: z.string().min(1) })`) to `backend/src/api/schemas.ts`
+- [x] T021 [US2] Add `POST /:code/restart` route handler (parse `restartGameSchema`, call `restartGame`, return `{ room: snapshot }`) in `backend/src/api/rooms.ts`
+- [x] T022 [US2] Add `restartGame(code, participantId)` API call (`POST /rooms/:code/restart`) in `frontend/src/services/api.ts`
+- [x] T023 [P] [US2] Add `restartGame(code, participantId)` store method (calls `api.restartGame`, then `this.setRoomSnapshot`) in `frontend/src/state/roomStore.ts`
+- [x] T024 [US2] Extend `ResultsPage`: add "Back to Lobby" `<button>` for host (calls `store.restartGame`), waiting message `<p>` for non-host, and `"lobby"` status redirect (`navigate("/lobby", { replace: true })`) in `frontend/src/pages/ResultsPage.tsx`
 
 **Checkpoint**: After T024, the full game loop is complete. End round → results → restart → lobby → new game all work end-to-end.
 
@@ -87,10 +87,10 @@
 
 **Purpose**: Confirm TypeScript compilation and test coverage meet constitution requirements (≥80%).
 
-- [ ] T025 Run backend tests and confirm all pass: `cd backend && npm run test` in `backend/`
-- [ ] T026 [P] Run frontend tests and confirm all pass: `cd frontend && npm run test` in `frontend/`
-- [ ] T027 [P] Verify backend TypeScript build succeeds with zero errors: `cd backend && npm run build` in `backend/`
-- [ ] T028 [P] Verify frontend TypeScript build succeeds with zero errors: `cd frontend && npm run build` in `frontend/`
+- [x] T025 Run backend tests and confirm all pass: `cd backend && npm run test` in `backend/`
+- [x] T026 [P] Run frontend tests and confirm all pass: `cd frontend && npm run test` in `frontend/`
+- [x] T027 [P] Verify backend TypeScript build succeeds with zero errors: `cd backend && npm run build` in `backend/`
+- [x] T028 [P] Verify frontend TypeScript build succeeds with zero errors: `cd frontend && npm run build` in `frontend/`
 
 ---
 
