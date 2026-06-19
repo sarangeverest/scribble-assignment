@@ -86,6 +86,7 @@ Every participant's score starts at 0 when a round begins. A correct guess adds 
 - What if a participant's canvas image is large? — Accepted as-is; no server-side size cap in scope for a single-instance local game.
 - What if the drawing polling returns stale data due to a slow network? — The canvas reflects the most recent server-stored state on each successful poll. No special stale-data handling.
 - What if two guessers submit correct guesses simultaneously? — Both are accepted and both scores increase by 100. Scoring is non-exclusive; first-guesser priority is a future feature.
+- What if GamePage has no active polling loop? — `canvasData`, `guesses`, and `scores` will not update automatically; they only change as a side-effect of user actions (e.g., `submitGuess`). `GamePage` MUST initialise its own `setInterval` polling loop (distinct from `LobbyPage`'s loop) to satisfy SC-002 and FR-004.
 
 ## Requirements *(mandatory)*
 

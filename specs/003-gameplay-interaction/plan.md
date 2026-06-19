@@ -245,3 +245,4 @@ Replace stub with functional implementation:
 **Both views**:
 - Pass `participants={room.participants}` to `<Scoreboard />`
 - Pass `guesses={room.guesses}` to `<ResultPanel />`
+- Add `useEffect` polling loop: `setInterval(() => store.fetchRoom(), 2000)` with `clearInterval` cleanup on unmount — required for SC-002 and FR-004; mirrors the `LobbyPage.tsx` polling pattern. Without this, `canvasData`, `guesses`, and `scores` only update on user actions, not automatically.
