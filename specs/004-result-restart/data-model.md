@@ -37,6 +37,15 @@ export type RoomStatus = "lobby" | "in-game" | "results";
 
 No new fields added to any interface. All existing interfaces (`Participant`, `Guess`, `Round`, `Room`, `RoomSnapshot`) are unchanged.
 
+**Post-restart lobby state** — when `restartGame` sets `room.currentRound = undefined`, `toRoomSnapshot` MUST return the following defaults via optional chaining / null-coalescing:
+
+| Field in snapshot | Value when `currentRound` is `undefined` |
+|-------------------|------------------------------------------|
+| `secretWord`      | `undefined` (absent from snapshot)       |
+| `guesses`         | `[]`                                     |
+| `canvasData`      | `""`                                     |
+| `drawerId`        | `null`                                   |
+
 ---
 
 ## No New Entities

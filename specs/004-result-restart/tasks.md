@@ -39,7 +39,7 @@
 
 - [ ] T003 [US1] Write failing tests for `endRound` service (404/400/403/transitions-to-results/preserves-round-data/exposes-secretWord-for-all) in `backend/src/services/roomStore.test.ts`
 - [ ] T004 [P] [US1] Write failing tests for `endRoundSchema` (rejects empty participantId, accepts valid participantId) in `backend/src/api/schemas.test.ts`
-- [ ] T005 [P] [US1] Write failing tests for `ResultsPage` display (no-room guard, stays-on-results, in-game redirect, secretWord rendered, Scoreboard rendered, ResultPanel rendered, polls every 2000ms) in `frontend/src/pages/ResultsPage.test.tsx`
+- [ ] T005 [P] [US1] Write failing tests for `ResultsPage` display (no-room guard, stays-on-results, in-game redirect, secretWord rendered, Scoreboard rendered, ResultPanel rendered, polls every 2000ms) in `frontend/src/pages/ResultsPage.test.tsx` — `ResultPanel` is an inline component defined in the same file as `ResultsPage`
 - [ ] T006 [P] [US1] Write failing tests for `GamePage`: navigates to `/results` when `room.status === "results"`, "End Round" button visible for host, hidden for non-host in `frontend/src/pages/GamePage.test.tsx`
 
 ### Implementation for User Story 1 (GREEN)
@@ -50,7 +50,7 @@
 - [ ] T010 [US1] Add `endRound(code, participantId)` API call (`POST /rooms/:code/end`) in `frontend/src/services/api.ts`
 - [ ] T011 [P] [US1] Add `endRound(code, participantId)` store method (calls `api.endRound`, then `this.setRoomSnapshot`) in `frontend/src/state/roomStore.ts`
 - [ ] T012 [US1] Add `"results"` status redirect (`navigate("/results", { replace: true })`) and "End Round" host button (calls `store.endRound`) to `frontend/src/pages/GamePage.tsx`
-- [ ] T013 [US1] Implement `ResultsPage` component: polling `useEffect` (2000ms, clearInterval on unmount), guard redirect (`!room → /`), status redirect (`"in-game" → /game`), display of `room.secretWord` in a `<Card>`, `<Scoreboard participants={room.participants} />`, `<ResultPanel guesses={room.guesses} />` in `frontend/src/pages/ResultsPage.tsx`
+- [ ] T013 [US1] Implement `ResultsPage` component: polling `useEffect` (2000ms, clearInterval on unmount), guard redirect (`!room → /`), status redirect (`"in-game" → /game`), display of `room.secretWord` in a `<Card>`, `<Scoreboard participants={room.participants} />`, `<ResultPanel guesses={room.guesses} />` in `frontend/src/pages/ResultsPage.tsx` — define `ResultPanel` as an inline function component at the top of this same file (not a separate file); renders guesses most-recent-first with submitter name and correct/incorrect indicator
 - [ ] T014 [US1] Add `/results` route (`<Route path="/results" element={<ResultsPage />} />`) in `frontend/src/routes/index.tsx`
 - [ ] T015 [P] [US1] Add ResultsPage CSS classes (`.results-page`, `.results-page__header`, `.results-page__title`, `.results-page__word`, `.results-page__columns`, `.results-page__waiting`) in `frontend/src/styles/app.css`
 

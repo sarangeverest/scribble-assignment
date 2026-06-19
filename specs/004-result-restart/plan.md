@@ -239,6 +239,8 @@ Two additions:
 
 ### `frontend/src/pages/ResultsPage.tsx` *(new)*
 
+`ResultPanel` is an **inline function component** defined at the top of `ResultsPage.tsx` — it is NOT a separate file in `components/`.
+
 ```
 On mount (useEffect — guard):
   if (!room) → navigate("/", { replace: true })
@@ -252,6 +254,11 @@ Status redirect (useEffect on [room?.status]):
   (status "results" → stay on this page)
 
 isHost = participantId === room.participants.find(p => p.isHost)?.id
+
+// Inline sub-component (defined above ResultsPage in the same file):
+function ResultPanel({ guesses }: { guesses: Guess[] }) {
+  // renders guesses most-recent-first: most recent at index 0 of [...guesses].reverse()
+}
 
 JSX layout:
   <section className="panel results-page">

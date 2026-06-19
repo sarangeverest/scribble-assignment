@@ -62,7 +62,7 @@ From the results screen, the host can restart the game. On restart, the room ret
 - **FR-001**: When the host ends the round, the system MUST transition the game to a results state.
 - **FR-002**: Only the host MUST be able to end the round; any non-host attempt MUST be rejected.
 - **FR-003**: When a round ends, the system MUST make the secret word visible to ALL participants in the results view.
-- **FR-004**: The results screen MUST display the secret word, final scores (sorted highest-to-lowest), and the complete guess history to all participants.
+- **FR-004**: The results screen MUST display the secret word, final scores (sorted highest-to-lowest), and the complete guess history to all participants. The guess history MUST be ordered most-recent-first; each entry MUST show the submitter's name and a correct/incorrect indicator.
 - **FR-005**: The system MUST include a restart control (e.g., "Back to Lobby" button) visible only to the host on the results screen.
 - **FR-006**: When the host restarts, the system MUST return the room to lobby status and clear all round data.
 - **FR-007**: Only the host MUST be able to restart; any non-host attempt MUST be rejected.
