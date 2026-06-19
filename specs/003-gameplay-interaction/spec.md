@@ -72,9 +72,9 @@ Every participant's score starts at 0 when a round begins. A correct guess adds 
 
 1. **Given** a round has just started, **When** any participant views the scoreboard, **Then** all participants show a score of 0.
 2. **Given** a guesser submits their first correct guess this round, **When** the next poll completes, **Then** that guesser's score has increased by exactly 100 and all participants see the updated score.
-5. **Given** a guesser has already submitted a correct guess this round, **When** they submit the correct answer again, **Then** the guess is accepted and recorded in history but their score does not change.
+2. **Given** a guesser has already submitted a correct guess this round, **When** they submit the correct answer again, **Then** the guess is accepted and recorded in history but their score does not change.
 3. **Given** a guesser submits an incorrect guess, **When** the next poll completes, **Then** their score is unchanged and all participants see no score change.
-4. **Given** guesses have been submitted, **When** any participant views the guess history, **Then** they see all guesses (correct and incorrect) in submission order with the submitter's name and correctness indicated.
+4. **Given** guesses have been submitted, **When** any participant views the guess history, **Then** they see all guesses (correct and incorrect) most-recent-first with the submitter's name and correctness indicated.
 
 ---
 
@@ -102,7 +102,7 @@ Every participant's score starts at 0 when a round begins. A correct guess adds 
 - **FR-009**: The first correct guess per player per round MUST add exactly 100 points to that player's score. Subsequent correct guesses from the same player in the same round MUST add 0 points.
 - **FR-010**: An incorrect guess MUST add 0 points (the guesser's score remains unchanged).
 - **FR-011**: All participant scores MUST be included in the room state returned by polling and visible to all participants.
-- **FR-012**: All submitted guesses (correct and incorrect) MUST be included in the room state returned by polling, visible to all participants in submission order.
+- **FR-012**: All submitted guesses (correct and incorrect) MUST be included in the room state returned by polling, visible to all participants most-recent-first.
 - **FR-013**: The drawer MUST NOT be able to submit guesses; any such attempt MUST be rejected.
 
 ### Key Entities
@@ -125,7 +125,7 @@ Every participant's score starts at 0 when a round begins. A correct guess adds 
 ## Assumptions
 
 - The round remains active until a future "end round" or "results" feature is implemented; a correct guess does not automatically end the round.
-- All participant scores start at 0 at round start (the score field is initialised when the round begins, not when the participant joins).
+- All participant scores default to 0 when the participant joins (the score field is initialised in `createParticipant`). There is no score reset on round start; since no scoring can occur before a round begins, scores are effectively 0 at round start for the first round. Round-reset is a future feature.
 - Guess attempts are unlimited in number; there is no cap on submissions. However, only the first correct guess per player per round awards +100 points — subsequent correct submissions from the same player score 0.
 - Canvas drawing uses a single default style (e.g., black stroke, fixed width); brush customisation (color, size) is out of scope.
 - The drawer is determined by the Scenario 2 flow (host is drawer for round 1); drawer rotation is out of scope.

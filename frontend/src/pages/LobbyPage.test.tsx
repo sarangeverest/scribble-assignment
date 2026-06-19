@@ -37,9 +37,11 @@ function makeRoom(overrides: Partial<RoomSnapshot> = {}): RoomSnapshot {
     code: "ABCD",
     status: "lobby",
     participants: [
-      { id: "host-id", name: "Alice", joinedAt: "2024-01-01T00:00:00Z", isHost: true }
+      { id: "host-id", name: "Alice", joinedAt: "2024-01-01T00:00:00Z", isHost: true, score: 0 }
     ],
     drawerId: null,
+    guesses: [],
+    canvasData: "",
     ...overrides
   };
 }

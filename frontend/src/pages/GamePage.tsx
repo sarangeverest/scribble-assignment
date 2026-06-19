@@ -1,15 +1,17 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
 import { GuessForm } from "../components/GuessForm";
 import { ResultPanel } from "../components/ResultPanel";
 import { RoomCodeBadge } from "../components/RoomCodeBadge";
 import { Scoreboard } from "../components/Scoreboard";
-import { useRoomState } from "../state/roomStore";
+import { useRoomState, useRoomStore } from "../state/roomStore";
 
 export function GamePage() {
   const navigate = useNavigate();
+  const store = useRoomStore();
   const { room, participantId } = useRoomState();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (!room) {
@@ -17,12 +19,64 @@ export function GamePage() {
     }
   }, [navigate, room]);
 
+  const isDrawer = participantId !== null && participantId === room?.drawerId;
+
+  const handleClear = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !room || !participantId) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    store.updateCanvas(room.code, participantId, "");
+  }, [room, participantId, store]);
+
+  useEffect(() => {
+    if (!isDrawer || !room || !participantId) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#000000";
+    ctx.lineCap = "round";
+
+    let drawing = false;
+
+    const onPointerDown = (e: PointerEvent) => {
+      drawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      if (!drawing) return;
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+    };
+
+    const onPointerUp = () => {
+      if (!drawing) return;
+      drawing = false;
+      store.updateCanvas(room.code, participantId, canvas.toDataURL("image/png"));
+    };
+
+    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerup", onPointerUp);
+
+    return () => {
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointerup", onPointerUp);
+    };
+  }, [isDrawer, room, participantId, store]);
+
   if (!room) {
     return null;
   }
 
   const viewer = room.participants.find((participant) => participant.id === participantId) ?? null;
-  const isDrawer = participantId !== null && participantId === room.drawerId;
   const drawer = room.participants.find((p) => p.id === room.drawerId) ?? null;
 
   return (
@@ -39,8 +93,8 @@ export function GamePage() {
 
       <div className="game-page__layout">
         <aside className="game-page__sidebar game-page__sidebar--left">
-          <Scoreboard />
-          <ResultPanel />
+          <Scoreboard participants={room.participants} />
+          <ResultPanel guesses={room.guesses} />
         </aside>
 
         <div className="game-page__main">
@@ -51,9 +105,27 @@ export function GamePage() {
           ) : null}
 
           <Card title="Canvas">
-            <div className="canvas-placeholder" style={{ minHeight: '500px', backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
-              Waiting for drawer...
-            </div>
+            {isDrawer ? (
+              <div className="canvas-wrapper">
+                <canvas
+                  ref={canvasRef}
+                  className="drawing-canvas"
+                  width={800}
+                  height={500}
+                />
+                <div className="button-row button-row--compact">
+                  <button className="button button--secondary" onClick={handleClear}>
+                    Clear
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <img
+                src={room.canvasData || undefined}
+                className="canvas-display"
+                alt="Drawing canvas"
+              />
+            )}
           </Card>
         </div>
 
@@ -71,9 +143,11 @@ export function GamePage() {
             </dl>
           </Card>
 
-          <Card title="Your Guess">
-            <GuessForm />
-          </Card>
+          {!isDrawer && (
+            <Card title="Your Guess">
+              <GuessForm roomCode={room.code} participantId={participantId ?? ""} />
+            </Card>
+          )}
         </aside>
       </div>
 

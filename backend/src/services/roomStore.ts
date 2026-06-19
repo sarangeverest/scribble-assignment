@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { Participant, Room, RoomSnapshot } from "../models/game.js";
+import type { Guess, Participant, Room, RoomSnapshot } from "../models/game.js";
 import { STARTER_WORDS } from "../seed/starterData.js";
 
 const rooms = new Map<string, Room>();
@@ -38,7 +38,8 @@ function createParticipant(name?: string, isHost = false): Participant {
     id: randomUUID(),
     name: displayName(name),
     joinedAt: now(),
-    isHost
+    isHost,
+    score: 0
   };
 }
 
@@ -107,7 +108,7 @@ export function startGame(code: string, participantId: string): RoomSnapshot {
     throw new Error("400: No words available to start the game");
   }
 
-  room.currentRound = { drawerId: caller.id, word: STARTER_WORDS[0], status: "active" };
+  room.currentRound = { drawerId: caller.id, word: STARTER_WORDS[0], status: "active", guesses: [], canvasData: "" };
   room.status = "in-game";
   room.updatedAt = now();
   rooms.set(room.code, room);
@@ -138,6 +139,57 @@ export function toRoomSnapshot(room: Room, viewerParticipantId?: string): RoomSn
     status: room.status,
     participants: room.participants.map((participant) => ({ ...participant })),
     drawerId,
+    guesses: room.currentRound?.guesses ?? [],
+    canvasData: room.currentRound?.canvasData ?? "",
     ...(secretWord !== undefined && { secretWord })
   };
+}
+
+export function submitGuess(
+  code: string,
+  participantId: string,
+  guessText: string
+): { snapshot: RoomSnapshot; isCorrect: boolean } {
+  const room = rooms.get(code.toUpperCase());
+  if (!room) throw new Error("404: Room not found");
+  if (!room.currentRound) throw new Error("400: No active round");
+  if (participantId === room.currentRound.drawerId) throw new Error("403: Drawer cannot guess");
+
+  const isCorrect = guessText.toLowerCase() === room.currentRound.word.toLowerCase();
+  const hasAlreadyScored = room.currentRound.guesses.some(
+    (g) => g.participantId === participantId && g.isCorrect
+  );
+
+  if (isCorrect && !hasAlreadyScored) {
+    const participant = room.participants.find((p) => p.id === participantId);
+    if (participant) participant.score += 100;
+  }
+
+  const submitter = room.participants.find((p) => p.id === participantId);
+  const guess: Guess = {
+    participantId,
+    participantName: submitter?.name ?? "Unknown",
+    text: guessText,
+    isCorrect,
+    timestamp: now()
+  };
+  room.currentRound.guesses.push(guess);
+  room.updatedAt = now();
+  rooms.set(room.code, room);
+
+  return {
+    snapshot: toRoomSnapshot(cloneRoom(room), participantId),
+    isCorrect
+  };
+}
+
+export function updateCanvas(code: string, participantId: string, canvasData: string): void {
+  const room = rooms.get(code.toUpperCase());
+  if (!room) throw new Error("404: Room not found");
+  if (!room.currentRound) throw new Error("400: No active round");
+  if (participantId !== room.currentRound.drawerId) throw new Error("403: Only the drawer can update the canvas");
+
+  room.currentRound.canvasData = canvasData;
+  room.updatedAt = now();
+  rooms.set(room.code, room);
 }

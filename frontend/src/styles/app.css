@@ -451,6 +451,118 @@ input {
   font-weight: 500;
 }
 
+.drawing-canvas {
+  display: block;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: crosshair;
+  max-width: 100%;
+  touch-action: none;
+}
+
+.canvas-display {
+  display: block;
+  max-width: 100%;
+  min-height: 300px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.canvas-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scoreboard {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scoreboard__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.875rem;
+}
+
+.scoreboard__row:last-child {
+  border-bottom: none;
+}
+
+.scoreboard__name {
+  color: var(--ink);
+}
+
+.scoreboard__score {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.result-panel {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.result-panel__item {
+  display: flex;
+  gap: 6px;
+  font-size: 0.8125rem;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.result-panel__item:last-child {
+  border-bottom: none;
+}
+
+.result-panel__item--correct {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.result-panel__name {
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.result-panel__text {
+  color: inherit;
+}
+
+.result-panel__empty {
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.guess-form__feedback--correct {
+  color: #16a34a;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  margin: 0 0 8px;
+}
+
+.guess-form__error {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin: 0 0 8px;
+}
+
 /* --- GAME PAGE LAYOUT --- */
 /* Changed layout structure to be much wider and utilize screen space */
 .game-page {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createRoomSchema, joinRoomSchema, roomCodeParamsSchema } from "./schemas.js";
+import { createRoomSchema, joinRoomSchema, roomCodeParamsSchema, submitGuessSchema, updateDrawingSchema } from "./schemas.js";
 
 describe("schemas", () => {
   it("createRoomSchema accepts a valid body with playerName", () => {
@@ -48,5 +48,51 @@ describe("schemas", () => {
     const result = createRoomSchema.parse({ playerName: "A".repeat(20) });
 
     expect(result.playerName).toHaveLength(20);
+  });
+
+  // ── US2: updateDrawingSchema ─────────────────────────────────────────────────
+
+  it("updateDrawingSchema accepts valid participantId and canvasData", () => {
+    const result = updateDrawingSchema.parse({ participantId: "uuid-1", canvasData: "data:image/png;base64,abc" });
+    expect(result.participantId).toBe("uuid-1");
+    expect(result.canvasData).toBe("data:image/png;base64,abc");
+  });
+
+  it("updateDrawingSchema accepts empty string canvasData (clear)", () => {
+    const result = updateDrawingSchema.parse({ participantId: "uuid-1", canvasData: "" });
+    expect(result.canvasData).toBe("");
+  });
+
+  it("updateDrawingSchema rejects missing participantId", () => {
+    expect(() => updateDrawingSchema.parse({ canvasData: "data:image/png;base64,abc" })).toThrow();
+  });
+
+  it("updateDrawingSchema rejects empty participantId", () => {
+    expect(() => updateDrawingSchema.parse({ participantId: "", canvasData: "" })).toThrow();
+  });
+
+  // ── US3: submitGuessSchema ───────────────────────────────────────────────────
+
+  it("submitGuessSchema accepts valid participantId and guess", () => {
+    const result = submitGuessSchema.parse({ participantId: "uuid-1", guess: "rocket" });
+    expect(result.participantId).toBe("uuid-1");
+    expect(result.guess).toBe("rocket");
+  });
+
+  it("submitGuessSchema trims whitespace from guess", () => {
+    const result = submitGuessSchema.parse({ participantId: "uuid-1", guess: "  rocket  " });
+    expect(result.guess).toBe("rocket");
+  });
+
+  it("submitGuessSchema rejects empty guess after trim", () => {
+    expect(() => submitGuessSchema.parse({ participantId: "uuid-1", guess: "   " })).toThrow();
+  });
+
+  it("submitGuessSchema rejects missing participantId", () => {
+    expect(() => submitGuessSchema.parse({ guess: "rocket" })).toThrow();
+  });
+
+  it("submitGuessSchema rejects empty participantId", () => {
+    expect(() => submitGuessSchema.parse({ participantId: "", guess: "rocket" })).toThrow();
   });
 });

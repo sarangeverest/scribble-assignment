@@ -34,10 +34,12 @@ function makeInGameRoom(overrides: Partial<RoomSnapshot> = {}): RoomSnapshot {
     code: "ABCD",
     status: "in-game",
     participants: [
-      { id: "host-id", name: "Alice", joinedAt: "2024-01-01T00:00:00Z", isHost: true },
-      { id: "guest-id", name: "Bob", joinedAt: "2024-01-01T00:00:00Z", isHost: false }
+      { id: "host-id", name: "Alice", joinedAt: "2024-01-01T00:00:00Z", isHost: true, score: 0 },
+      { id: "guest-id", name: "Bob", joinedAt: "2024-01-01T00:00:00Z", isHost: false, score: 0 }
     ],
     drawerId: "host-id",
+    guesses: [],
+    canvasData: "",
     ...overrides
   };
 }
@@ -115,5 +117,71 @@ describe("GamePage", () => {
     await act(async () => { root.render(createElement(GamePage)); });
 
     expect(container.textContent).not.toContain("rocket");
+  });
+
+  // ── US1: Drawer canvas ───────────────────────────────────────────────────────
+
+  it("renders a canvas element (not placeholder div) for the drawer", async () => {
+    roomStateRef.participantId = "host-id";
+    roomStateRef.room = makeInGameRoom({ drawerId: "host-id" });
+
+    await act(async () => { root.render(createElement(GamePage)); });
+
+    expect(container.querySelector("canvas")).not.toBeNull();
+    expect(container.querySelector(".canvas-placeholder")).toBeNull();
+  });
+
+  it("shows a Clear button in the drawer view", async () => {
+    roomStateRef.participantId = "host-id";
+    roomStateRef.room = makeInGameRoom({ drawerId: "host-id" });
+
+    await act(async () => { root.render(createElement(GamePage)); });
+
+    const buttons = Array.from(container.querySelectorAll("button"));
+    expect(buttons.some((b) => b.textContent?.toLowerCase().includes("clear"))).toBe(true);
+  });
+
+  it("does not render a canvas element for the guesser", async () => {
+    roomStateRef.participantId = "guest-id";
+    roomStateRef.room = makeInGameRoom({ drawerId: "host-id" });
+
+    await act(async () => { root.render(createElement(GamePage)); });
+
+    expect(container.querySelector("canvas")).toBeNull();
+  });
+
+  // ── US2: Guesser canvas display ──────────────────────────────────────────────
+
+  it("guesser view renders an img element with src from room.canvasData", async () => {
+    roomStateRef.participantId = "guest-id";
+    roomStateRef.room = makeInGameRoom({ drawerId: "host-id", canvasData: "data:image/png;base64,abc" });
+
+    await act(async () => { root.render(createElement(GamePage)); });
+
+    const img = container.querySelector("img.canvas-display") as HTMLImageElement | null;
+    expect(img).not.toBeNull();
+    expect(img!.src).toContain("data:image/png;base64,abc");
+  });
+
+  it("guesser view renders img with no src when canvasData is empty", async () => {
+    roomStateRef.participantId = "guest-id";
+    roomStateRef.room = makeInGameRoom({ drawerId: "host-id", canvasData: "" });
+
+    await act(async () => { root.render(createElement(GamePage)); });
+
+    const img = container.querySelector("img.canvas-display") as HTMLImageElement | null;
+    expect(img).not.toBeNull();
+    expect(img!.getAttribute("src")).toBeNull();
+  });
+
+  // ── US3: GuessForm not shown for drawer ──────────────────────────────────────
+
+  it("does not render GuessForm for the drawer", async () => {
+    roomStateRef.participantId = "host-id";
+    roomStateRef.room = makeInGameRoom({ drawerId: "host-id" });
+
+    await act(async () => { root.render(createElement(GamePage)); });
+
+    expect(container.querySelector(".guess-form")).toBeNull();
   });
 });

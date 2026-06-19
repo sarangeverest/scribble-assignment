@@ -1,11 +1,30 @@
+import type { Guess } from "../services/api";
 import { Card } from "./Card";
 
-export function ResultPanel() {
+interface ResultPanelProps {
+  guesses: Guess[];
+}
+
+export function ResultPanel({ guesses }: ResultPanelProps) {
+  const ordered = [...guesses].reverse();
+
   return (
     <Card title="Activity">
-      <div className="placeholder-block" style={{ backgroundColor: '#f9fafb' }}>
-        <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>Game activity and guesses will appear here.</p>
-      </div>
+      {ordered.length === 0 ? (
+        <p className="result-panel__empty">No guesses yet.</p>
+      ) : (
+        <ul className="result-panel">
+          {ordered.map((g, i) => (
+            <li
+              key={i}
+              className={`result-panel__item${g.isCorrect ? " result-panel__item--correct" : ""}`}
+            >
+              <span className="result-panel__name">{g.participantName}</span>
+              <span className="result-panel__text">{g.text}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </Card>
   );
 }

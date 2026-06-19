@@ -1,16 +1,27 @@
 export type RoomStatus = "lobby" | "in-game";
 
+export interface Guess {
+  participantId: string;
+  participantName: string;
+  text: string;
+  isCorrect: boolean;
+  timestamp: string;
+}
+
 export interface Participant {
   id: string;
   name: string;
   joinedAt: string;
   isHost: boolean;
+  score: number;
 }
 
 export interface Round {
   drawerId: string;
   word: string;
   status: "active";
+  guesses: Guess[];
+  canvasData: string;
 }
 
 export interface Room {
@@ -28,6 +39,8 @@ export interface RoomSnapshot {
   participants: Participant[];
   drawerId: string | null;
   secretWord?: string;
+  guesses: Guess[];
+  canvasData: string;
 }
 
 export interface RoomSessionResponse {

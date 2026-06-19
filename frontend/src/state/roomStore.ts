@@ -104,6 +104,16 @@ class RoomStore {
     this.setRoomSnapshot(response.room);
     return response.room;
   }
+
+  async submitGuess(code: string, participantId: string, guess: string) {
+    const response = await api.submitGuess(code, participantId, guess);
+    this.setRoomSnapshot(response.room);
+    return response.isCorrect;
+  }
+
+  async updateCanvas(code: string, participantId: string, canvasData: string) {
+    await api.updateCanvas(code, participantId, canvasData);
+  }
 }
 
 const RoomStoreContext = createContext<RoomStore | null>(null);

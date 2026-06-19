@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createRoom, joinRoom, startGame, getRoom, toRoomSnapshot } from "./roomStore.js";
+import { createRoom, joinRoom, startGame, getRoom, toRoomSnapshot, updateCanvas, submitGuess } from "./roomStore.js";
 
 describe("roomStore", () => {
   it("createRoom returns a room with a 4-character uppercase code", () => {
@@ -166,5 +166,193 @@ describe("roomStore", () => {
     const lobbyRoom = getRoom(room.code)!;
 
     expect(toRoomSnapshot(lobbyRoom, hostId).secretWord).toBeUndefined();
+  });
+
+  // ── Foundational: score, guesses, canvasData ─────────────────────────────────
+
+  it("createRoom gives the host participant score of 0", () => {
+    const { room } = createRoom("Alice");
+    expect(room.participants[0].score).toBe(0);
+  });
+
+  it("joinRoom gives the joining participant score of 0", () => {
+    const { room } = createRoom("Alice");
+    const result = joinRoom(room.code, "Bob");
+    expect(result!.room.participants[1].score).toBe(0);
+  });
+
+  it("startGame initialises currentRound.guesses as empty array", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    expect(getRoom(room.code)!.currentRound?.guesses).toEqual([]);
+  });
+
+  it("startGame initialises currentRound.canvasData as empty string", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    expect(getRoom(room.code)!.currentRound?.canvasData).toBe("");
+  });
+
+  it("toRoomSnapshot includes guesses array in snapshot", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    const snapshot = toRoomSnapshot(getRoom(room.code)!, hostId);
+    expect(snapshot.guesses).toEqual([]);
+  });
+
+  it("toRoomSnapshot includes canvasData string in snapshot", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    const snapshot = toRoomSnapshot(getRoom(room.code)!, hostId);
+    expect(snapshot.canvasData).toBe("");
+  });
+
+  it("toRoomSnapshot returns guesses: [] and canvasData: '' for lobby snapshot", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const lobbyRoom = getRoom(room.code)!;
+    const snapshot = toRoomSnapshot(lobbyRoom, hostId);
+    expect(snapshot.guesses).toEqual([]);
+    expect(snapshot.canvasData).toBe("");
+  });
+
+  // ── US2: updateCanvas ────────────────────────────────────────────────────────
+
+  it("updateCanvas stores canvasData on currentRound for the drawer", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    updateCanvas(room.code, hostId, "data:image/png;base64,abc");
+    expect(getRoom(room.code)!.currentRound?.canvasData).toBe("data:image/png;base64,abc");
+  });
+
+  it("updateCanvas throws 403 when caller is not the drawer", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    expect(() => updateCanvas(room.code, guestResult.participantId, "data:image/png;base64,abc")).toThrow(/403/);
+  });
+
+  it("updateCanvas throws 400 when there is no active round", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    expect(() => updateCanvas(room.code, hostId, "data:image/png;base64,abc")).toThrow(/400/);
+  });
+
+  it("updateCanvas throws 404 when room does not exist", () => {
+    expect(() => updateCanvas("ZZZZ", "any-id", "")).toThrow(/404/);
+  });
+
+  it("toRoomSnapshot returns updated canvasData after updateCanvas call", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    updateCanvas(room.code, hostId, "data:image/png;base64,xyz");
+    const snapshot = toRoomSnapshot(getRoom(room.code)!, hostId);
+    expect(snapshot.canvasData).toBe("data:image/png;base64,xyz");
+  });
+
+  it("updateCanvas stores empty string when canvas is cleared", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    updateCanvas(room.code, hostId, "data:image/png;base64,abc");
+    updateCanvas(room.code, hostId, "");
+    expect(getRoom(room.code)!.currentRound?.canvasData).toBe("");
+  });
+
+  // ── US3: submitGuess ─────────────────────────────────────────────────────────
+
+  it("submitGuess returns isCorrect: true for case-insensitive match", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    const { isCorrect } = submitGuess(room.code, guestResult.participantId, "ROCKET");
+    expect(isCorrect).toBe(true);
+  });
+
+  it("submitGuess returns isCorrect: false for non-matching guess", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    const { isCorrect } = submitGuess(room.code, guestResult.participantId, "banana");
+    expect(isCorrect).toBe(false);
+  });
+
+  it("submitGuess throws 403 when drawer tries to guess", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    joinRoom(room.code, "Bob");
+    startGame(room.code, hostId);
+    expect(() => submitGuess(room.code, hostId, "rocket")).toThrow(/403/);
+  });
+
+  it("submitGuess throws 400 when there is no active round", () => {
+    const { room } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    expect(() => submitGuess(room.code, guestResult.participantId, "rocket")).toThrow(/400/);
+  });
+
+  it("submitGuess throws 404 when room does not exist", () => {
+    expect(() => submitGuess("ZZZZ", "any-id", "rocket")).toThrow(/404/);
+  });
+
+  it("submitGuess increments guesser score by 100 on first correct guess", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    submitGuess(room.code, guestResult.participantId, "rocket");
+    const guesser = getRoom(room.code)!.participants.find((p) => p.id === guestResult.participantId)!;
+    expect(guesser.score).toBe(100);
+  });
+
+  it("submitGuess does not increment score on second correct guess by same player", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    submitGuess(room.code, guestResult.participantId, "rocket");
+    submitGuess(room.code, guestResult.participantId, "ROCKET");
+    const guesser = getRoom(room.code)!.participants.find((p) => p.id === guestResult.participantId)!;
+    expect(guesser.score).toBe(100);
+  });
+
+  it("submitGuess does not change score for incorrect guess", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    submitGuess(room.code, guestResult.participantId, "banana");
+    const guesser = getRoom(room.code)!.participants.find((p) => p.id === guestResult.participantId)!;
+    expect(guesser.score).toBe(0);
+  });
+
+  it("submitGuess appends the guess to currentRound.guesses", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    submitGuess(room.code, guestResult.participantId, "banana");
+    expect(getRoom(room.code)!.currentRound?.guesses).toHaveLength(1);
+    expect(getRoom(room.code)!.currentRound?.guesses[0].text).toBe("banana");
+  });
+
+  it("submitGuess snapshot includes the new guess in guesses array", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    const { snapshot } = submitGuess(room.code, guestResult.participantId, "banana");
+    expect(snapshot.guesses).toHaveLength(1);
+    expect(snapshot.guesses[0].isCorrect).toBe(false);
+  });
+
+  it("submitGuess marks second correct guess as isCorrect: true but does not score", () => {
+    const { room, participantId: hostId } = createRoom("Alice");
+    const guestResult = joinRoom(room.code, "Bob")!;
+    startGame(room.code, hostId);
+    submitGuess(room.code, guestResult.participantId, "rocket");
+    const { isCorrect, snapshot } = submitGuess(room.code, guestResult.participantId, "rocket");
+    expect(isCorrect).toBe(true);
+    const guesser = snapshot.participants.find((p) => p.id === guestResult.participantId)!;
+    expect(guesser.score).toBe(100);
   });
 });

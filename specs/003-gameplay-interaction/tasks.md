@@ -19,7 +19,7 @@
 
 **Purpose**: Confirm the codebase is in a known-green state before any changes.
 
-- [ ] T001 Run `cd backend && npm run test` and `cd frontend && npm run test` to confirm all existing tests pass before any changes
+- [x] T001 Run `cd backend && npm run test` and `cd frontend && npm run test` to confirm all existing tests pass before any changes
 
 ---
 
@@ -31,11 +31,11 @@
 
 > **TDD**: Write the failing tests in T002 first. Verify they fail. Then implement T003–T006.
 
-- [ ] T002 Write failing tests for foundational changes in `backend/src/services/roomStore.test.ts`: (a) `createParticipant` produces `score: 0`; (b) `startGame` initialises `currentRound.guesses = []` and `currentRound.canvasData = ""`; (c) `toRoomSnapshot` includes `guesses: []` and `canvasData: ""` in lobby snapshot
-- [ ] T003 Add `Guess` interface; add `score: number` to `Participant`; add `guesses: Guess[]` and `canvasData: string` to `Round`; add `guesses: Guess[]` and `canvasData: string` to `RoomSnapshot` in `backend/src/models/game.ts`
-- [ ] T004 Update `createParticipant` to set `score: 0`; update `startGame` to initialise `guesses: []` and `canvasData: ""`; update `toRoomSnapshot` to return `guesses: room.currentRound?.guesses ?? []` and `canvasData: room.currentRound?.canvasData ?? ""` in `backend/src/services/roomStore.ts`
-- [ ] T005 [P] Add `Guess` interface; add `score: number` to `Participant`; add `guesses: Guess[]` and `canvasData: string` to `RoomSnapshot`; add `submitGuess` and `updateCanvas` functions to `api` object in `frontend/src/services/api.ts`
-- [ ] T006 [P] Mirror same type additions (`Guess`, `score` on `Participant`, `guesses`/`canvasData` on `RoomSnapshot`); add `submitGuess` and `updateCanvas` async methods to `RoomStore` class in `frontend/src/state/roomStore.ts`
+- [x] T002 Write failing tests for foundational changes in `backend/src/services/roomStore.test.ts`: (a) `createParticipant` produces `score: 0`; (b) `startGame` initialises `currentRound.guesses = []` and `currentRound.canvasData = ""`; (c) `toRoomSnapshot` includes `guesses: []` and `canvasData: ""` in lobby snapshot
+- [x] T003 Add `Guess` interface; add `score: number` to `Participant`; add `guesses: Guess[]` and `canvasData: string` to `Round`; add `guesses: Guess[]` and `canvasData: string` to `RoomSnapshot` in `backend/src/models/game.ts`
+- [x] T004 Update `createParticipant` to set `score: 0`; update `startGame` to initialise `guesses: []` and `canvasData: ""`; update `toRoomSnapshot` to return `guesses: room.currentRound?.guesses ?? []` and `canvasData: room.currentRound?.canvasData ?? ""` in `backend/src/services/roomStore.ts`
+- [x] T005 [P] Add `Guess` interface; add `score: number` to `Participant`; add `guesses: Guess[]` and `canvasData: string` to `RoomSnapshot`; add `submitGuess` and `updateCanvas` functions to `api` object in `frontend/src/services/api.ts`
+- [x] T006 [P] Mirror same type additions (`Guess`, `score` on `Participant`, `guesses`/`canvasData` on `RoomSnapshot`); add `submitGuess` and `updateCanvas` async methods to `RoomStore` class in `frontend/src/state/roomStore.ts`
 
 **Checkpoint**: Run `npm run test` in backend — T002 tests must pass. Run `npm run build` in both packages — zero TypeScript errors before proceeding.
 
@@ -49,10 +49,10 @@
 
 > **TDD**: Write T007–T008 first and confirm they fail before implementing T009–T010.
 
-- [ ] T007 Write failing tests in `frontend/src/pages/GamePage.test.tsx`: (a) drawer view renders a `<canvas>` element (not a div placeholder); (b) "Clear" button is present in drawer view; (c) guesser view does NOT render a `<canvas>` element
-- [ ] T008 Write failing test in `frontend/src/pages/GamePage.test.tsx`: drawer view does not render `<GuessForm>`
-- [ ] T009 [US1] Replace the canvas placeholder `<div>` with `<canvas ref={canvasRef} className="drawing-canvas" width={800} height={500} />`; wire `useEffect` to attach `pointerdown` (begin path + moveTo), `pointermove` (lineTo + stroke if pressing), and `pointerup` (end path) handlers with a black 3 px stroke style in `frontend/src/pages/GamePage.tsx`
-- [ ] T010 [US1] Add "Clear" `<button>` below the canvas for the drawer view that calls `ctx.clearRect(0, 0, canvas.width, canvas.height)` in `frontend/src/pages/GamePage.tsx`
+- [x] T007 Write failing tests in `frontend/src/pages/GamePage.test.tsx`: (a) drawer view renders a `<canvas>` element (not a div placeholder); (b) "Clear" button is present in drawer view; (c) guesser view does NOT render a `<canvas>` element
+- [x] T008 Write failing test in `frontend/src/pages/GamePage.test.tsx`: drawer view does not render `<GuessForm>`
+- [x] T009 [US1] Replace the canvas placeholder `<div>` with `<canvas ref={canvasRef} className="drawing-canvas" width={800} height={500} />`; wire `useEffect` to attach `pointerdown` (begin path + moveTo), `pointermove` (lineTo + stroke if pressing), and `pointerup` (end path) handlers with a black 3 px stroke style in `frontend/src/pages/GamePage.tsx`
+- [x] T010 [US1] Add "Clear" `<button>` below the canvas for the drawer view that calls `ctx.clearRect(0, 0, canvas.width, canvas.height)` in `frontend/src/pages/GamePage.tsx`
 
 **Checkpoint**: Run `npm run test` (frontend) — T007–T008 pass. Manually open the game screen as drawer and confirm drawing and clearing work locally.
 
@@ -66,14 +66,14 @@
 
 > **TDD**: Write T011–T013 first and confirm they fail before implementing T014–T018.
 
-- [ ] T011 Write failing tests in `backend/src/services/roomStore.test.ts` for `updateCanvas`: (a) stores `canvasData` on `currentRound` for the drawer; (b) throws 403 when caller is not the drawer; (c) throws 400 when no active round; (d) `toRoomSnapshot` returns updated `canvasData` after an update
-- [ ] T012 Write failing tests in `backend/src/api/schemas.test.ts` for `updateDrawingSchema`: (a) accepts valid `{ participantId, canvasData }`; (b) rejects missing `participantId`; (c) accepts `canvasData: ""`
-- [ ] T013 Write failing tests in `frontend/src/pages/GamePage.test.tsx`: (a) guesser view renders `<img>` with `src` equal to `room.canvasData` when non-empty; (b) guesser view renders `<img>` with no `src` (undefined) when `canvasData === ""`
-- [ ] T014 [P] Add `updateDrawingSchema = z.object({ participantId: z.string().min(1), canvasData: z.string() })` to `backend/src/api/schemas.ts`
-- [ ] T015 [US2] Implement `updateCanvas(code, participantId, canvasData)` with guards (404 room not found, 400 no active round, 403 not drawer) and `room.currentRound.canvasData = canvasData` in `backend/src/services/roomStore.ts`
-- [ ] T016 [US2] Add `POST /:code/drawing` handler to `backend/src/api/rooms.ts`: parse `updateDrawingSchema`, call `updateCanvas`, return `{ ok: true }`, forward errors via `next` with `HttpError` mapping
-- [ ] T017 [US2] Wire the `pointerup` handler added in T009 to call `store.updateCanvas(room.code, participantId, canvasRef.current.toDataURL("image/png"))` in `frontend/src/pages/GamePage.tsx`; wire the "Clear" button from T010 to also call `store.updateCanvas(room.code, participantId, "")` after clearing
-- [ ] T018 [US2] Replace any remaining canvas placeholder for the guesser view with `<img src={room.canvasData || undefined} className="canvas-display" alt="Drawing canvas" />` in `frontend/src/pages/GamePage.tsx`
+- [x] T011 Write failing tests in `backend/src/services/roomStore.test.ts` for `updateCanvas`: (a) stores `canvasData` on `currentRound` for the drawer; (b) throws 403 when caller is not the drawer; (c) throws 400 when no active round; (d) `toRoomSnapshot` returns updated `canvasData` after an update
+- [x] T012 Write failing tests in `backend/src/api/schemas.test.ts` for `updateDrawingSchema`: (a) accepts valid `{ participantId, canvasData }`; (b) rejects missing `participantId`; (c) accepts `canvasData: ""`
+- [x] T013 Write failing tests in `frontend/src/pages/GamePage.test.tsx`: (a) guesser view renders `<img>` with `src` equal to `room.canvasData` when non-empty; (b) guesser view renders `<img>` with no `src` (undefined) when `canvasData === ""`
+- [x] T014 [P] Add `updateDrawingSchema = z.object({ participantId: z.string().min(1), canvasData: z.string() })` to `backend/src/api/schemas.ts`
+- [x] T015 [US2] Implement `updateCanvas(code, participantId, canvasData)` with guards (404 room not found, 400 no active round, 403 not drawer) and `room.currentRound.canvasData = canvasData` in `backend/src/services/roomStore.ts`
+- [x] T016 [US2] Add `POST /:code/drawing` handler to `backend/src/api/rooms.ts`: parse `updateDrawingSchema`, call `updateCanvas`, return `{ ok: true }`, forward errors via `next` with `HttpError` mapping
+- [x] T017 [US2] Wire the `pointerup` handler added in T009 to call `store.updateCanvas(room.code, participantId, canvasRef.current.toDataURL("image/png"))` in `frontend/src/pages/GamePage.tsx`; wire the "Clear" button from T010 to also call `store.updateCanvas(room.code, participantId, "")` after clearing
+- [x] T018 [US2] Replace any remaining canvas placeholder for the guesser view with `<img src={room.canvasData || undefined} className="canvas-display" alt="Drawing canvas" />` in `frontend/src/pages/GamePage.tsx`
 
 **Checkpoint**: Run `npm run test` (backend + frontend) — T011–T013 pass. Manual end-to-end: draw in drawer tab, confirm guesser tab reflects it within ~2 s.
 
@@ -87,14 +87,14 @@
 
 > **TDD**: Write T019–T021 first and confirm they fail before implementing T022–T026.
 
-- [ ] T019 Write failing tests in `backend/src/services/roomStore.test.ts` for `submitGuess`: (a) case-insensitive match returns `isCorrect: true`; (b) non-match returns `isCorrect: false`; (c) drawer calling `submitGuess` throws 403; (d) empty guess (after Zod trim) throws 400; (e) first correct guess increments `participant.score` by 100; (f) second correct guess by same participant does NOT increment score again; (g) incorrect guess leaves score unchanged; (h) guess is appended to `currentRound.guesses`; (i) returned snapshot includes the new guess in `guesses[]`
-- [ ] T020 Write failing tests in `backend/src/api/schemas.test.ts` for `submitGuessSchema`: (a) trims whitespace from `guess`; (b) rejects empty string after trim; (c) rejects missing `participantId`; (d) accepts valid payload
-- [ ] T021 Write failing tests in `frontend/src/components/GuessForm.test.tsx`: (a) submitting empty input shows "Guess cannot be empty" error; (b) submitting non-empty guess calls `store.submitGuess`; (c) on `isCorrect: true` response: input is cleared and "Correct!" is shown; (d) on `isCorrect: false` response: input is cleared; (e) component is not rendered when `isDrawer` prop is true
-- [ ] T022 [P] Add `submitGuessSchema = z.object({ participantId: z.string().min(1), guess: z.string().trim().min(1, "Guess cannot be empty") })` to `backend/src/api/schemas.ts`
-- [ ] T023 [US3] Implement `submitGuess(code, participantId, guessText)` with guards (404 room, 400 no round, 403 drawer), case-insensitive comparison, first-correct-only score increment (`guesses.some(g => g.participantId === participantId && g.isCorrect)` check), and `guesses.push(...)` in `backend/src/services/roomStore.ts`
-- [ ] T024 [US3] Add `POST /:code/guess` handler to `backend/src/api/rooms.ts`: parse `submitGuessSchema`, call `submitGuess`, return `{ isCorrect, room: snapshot }`, forward errors via `next` with `HttpError` mapping
-- [ ] T025 [US3] Replace stub `GuessForm` with functional implementation: trim + empty client-side guard, call `store.submitGuess(roomCode, participantId, guess)`, on correct → set `feedback = "correct"` + clear input, on incorrect → clear input, always re-enable; accept `roomCode: string`, `participantId: string`, `isDrawer: boolean` props; render nothing when `isDrawer` in `frontend/src/components/GuessForm.tsx`
-- [ ] T026 [US3] Pass `roomCode={room.code}`, `participantId={participantId ?? ""}`, `isDrawer={isDrawer}` to `<GuessForm>` in `frontend/src/pages/GamePage.tsx`
+- [x] T019 Write failing tests in `backend/src/services/roomStore.test.ts` for `submitGuess`: (a) case-insensitive match returns `isCorrect: true`; (b) non-match returns `isCorrect: false`; (c) drawer calling `submitGuess` throws 403; (d) empty guess (after Zod trim) throws 400; (e) first correct guess increments `participant.score` by 100; (f) second correct guess by same participant does NOT increment score again; (g) incorrect guess leaves score unchanged; (h) guess is appended to `currentRound.guesses`; (i) returned snapshot includes the new guess in `guesses[]`
+- [x] T020 Write failing tests in `backend/src/api/schemas.test.ts` for `submitGuessSchema`: (a) trims whitespace from `guess`; (b) rejects empty string after trim; (c) rejects missing `participantId`; (d) accepts valid payload
+- [x] T021 Write failing tests in `frontend/src/components/GuessForm.test.tsx`: (a) submitting empty input shows "Guess cannot be empty" error; (b) submitting non-empty guess calls `store.submitGuess`; (c) on `isCorrect: true` response: input is cleared and "Correct!" is shown; (d) on `isCorrect: false` response: input is cleared; (e) component is not rendered when `isDrawer` prop is true
+- [x] T022 [P] Add `submitGuessSchema = z.object({ participantId: z.string().min(1), guess: z.string().trim().min(1, "Guess cannot be empty") })` to `backend/src/api/schemas.ts`
+- [x] T023 [US3] Implement `submitGuess(code, participantId, guessText)` with guards (404 room, 400 no round, 403 drawer), case-insensitive comparison, first-correct-only score increment (`guesses.some(g => g.participantId === participantId && g.isCorrect)` check), and `guesses.push(...)` in `backend/src/services/roomStore.ts`
+- [x] T024 [US3] Add `POST /:code/guess` handler to `backend/src/api/rooms.ts`: parse `submitGuessSchema`, call `submitGuess`, return `{ isCorrect, room: snapshot }`, forward errors via `next` with `HttpError` mapping
+- [x] T025 [US3] Replace stub `GuessForm` with functional implementation: trim + empty client-side guard, call `store.submitGuess(roomCode, participantId, guess)`, on correct → set `feedback = "correct"` + clear input, on incorrect → clear input, always re-enable; accept `roomCode: string`, `participantId: string`, `isDrawer: boolean` props; render nothing when `isDrawer` in `frontend/src/components/GuessForm.tsx`
+- [x] T026 [US3] Pass `roomCode={room.code}`, `participantId={participantId ?? ""}`, `isDrawer={isDrawer}` to `<GuessForm>` in `frontend/src/pages/GamePage.tsx`
 
 **Checkpoint**: Run `npm run test` (backend + frontend) — T019–T021 pass. Manual: submit correct and incorrect guesses, verify feedback and history.
 
@@ -108,11 +108,11 @@
 
 > **TDD**: Write T027–T028 first and confirm they fail before implementing T029–T031.
 
-- [ ] T027 Write failing tests in `frontend/src/components/Scoreboard.test.tsx`: (a) renders each participant's name and score; (b) participants sorted by score descending; (c) participant with highest score appears first; (d) renders "0" for participants with no score
-- [ ] T028 Write failing tests in `frontend/src/components/ResultPanel.test.tsx`: (a) renders each guess's submitter name and text; (b) most recent guess appears first; (c) correct guesses carry a distinguishing CSS class or attribute; (d) renders empty state gracefully when `guesses` is empty
-- [ ] T029 [P] [US4] Replace stub `Scoreboard` with functional implementation: accept `participants: Participant[]` prop, render `[...participants].sort((a, b) => b.score - a.score)` as name + score rows in `frontend/src/components/Scoreboard.tsx`
-- [ ] T030 [P] [US4] Replace stub `ResultPanel` with functional implementation: accept `guesses: Guess[]` prop, render `[...guesses].reverse()` as submitter-name + guess-text rows, apply `correct` CSS class to entries where `isCorrect === true` in `frontend/src/components/ResultPanel.tsx`
-- [ ] T031 [US4] Pass `participants={room.participants}` to `<Scoreboard>` and `guesses={room.guesses}` to `<ResultPanel>` in `frontend/src/pages/GamePage.tsx`; remove any hardcoded placeholder content from both components
+- [x] T027 Write failing tests in `frontend/src/components/Scoreboard.test.tsx`: (a) renders each participant's name and score; (b) participants sorted by score descending; (c) participant with highest score appears first; (d) renders "0" for participants with no score
+- [x] T028 Write failing tests in `frontend/src/components/ResultPanel.test.tsx`: (a) renders each guess's submitter name and text; (b) most recent guess appears first; (c) correct guesses carry a distinguishing CSS class or attribute; (d) renders empty state gracefully when `guesses` is empty
+- [x] T029 [P] [US4] Replace stub `Scoreboard` with functional implementation: accept `participants: Participant[]` prop, render `[...participants].sort((a, b) => b.score - a.score)` as name + score rows in `frontend/src/components/Scoreboard.tsx`
+- [x] T030 [P] [US4] Replace stub `ResultPanel` with functional implementation: accept `guesses: Guess[]` prop, render `[...guesses].reverse()` as submitter-name + guess-text rows, apply `correct` CSS class to entries where `isCorrect === true` in `frontend/src/components/ResultPanel.tsx`
+- [x] T031 [US4] Pass `participants={room.participants}` to `<Scoreboard>` and `guesses={room.guesses}` to `<ResultPanel>` in `frontend/src/pages/GamePage.tsx`; remove any hardcoded placeholder content from both components
 
 **Checkpoint**: Run `npm run test` (frontend) — T027–T028 pass. Manual: verify scoreboard and history update after guesses.
 
@@ -122,11 +122,11 @@
 
 **Purpose**: Final build validation, CSS wiring, and end-to-end verification.
 
-- [ ] T032 [P] Add CSS for `.drawing-canvas` (cursor: crosshair; display: block; background: white; border: 1px solid #e5e7eb) and `.canvas-display` (max-width: 100%; display: block; min-height: 300px; background: white; border: 1px solid #e5e7eb) and `.guess-history__item--correct` (color: #16a34a; font-weight: 600) in `frontend/src/styles/app.css`
-- [ ] T033 [P] Run `cd backend && npm run build` — confirm zero TypeScript errors
-- [ ] T034 [P] Run `cd frontend && npm run build` — confirm zero TypeScript errors
-- [ ] T035 [P] Run `cd backend && npm run test` — confirm all tests pass and coverage ≥ 80%
-- [ ] T036 [P] Run `cd frontend && npm run test` — confirm all tests pass and coverage ≥ 80%
+- [x] T032 [P] Add CSS for `.drawing-canvas` (cursor: crosshair; display: block; background: white; border: 1px solid #e5e7eb) and `.canvas-display` (max-width: 100%; display: block; min-height: 300px; background: white; border: 1px solid #e5e7eb) and `.guess-history__item--correct` (color: #16a34a; font-weight: 600) in `frontend/src/styles/app.css`
+- [x] T033 [P] Run `cd backend && npm run build` — confirm zero TypeScript errors
+- [x] T034 [P] Run `cd frontend && npm run build` — confirm zero TypeScript errors
+- [x] T035 [P] Run `cd backend && npm run test` — confirm all tests pass and coverage ≥ 80%
+- [x] T036 [P] Run `cd frontend && npm run test` — confirm all tests pass and coverage ≥ 80%
 
 ---
 
