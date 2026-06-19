@@ -56,6 +56,7 @@ Guessers can type and submit their guess for the secret word at any time during 
 2. **Given** the secret word is "rocket", **When** a guesser submits "ROCKET" or "Rocket" or "  rocket  " (with spaces), **Then** the guess is treated as correct after trimming and case-insensitive comparison.
 3. **Given** the secret word is "rocket", **When** a guesser submits "banana", **Then** the guess is treated as incorrect.
 4. **Given** the drawer is viewing the game screen, **When** the guess input is present in the UI, **Then** it is hidden or disabled — the drawer cannot submit guesses.
+5. **Given** a guesser submits the correct answer, **When** the submission is accepted, **Then** the input is cleared, a "Correct!" feedback message is shown, and the input is re-enabled so further guesses can be submitted.
 
 ---
 
@@ -70,7 +71,8 @@ Every participant's score starts at 0 when a round begins. A correct guess adds 
 **Acceptance Scenarios**:
 
 1. **Given** a round has just started, **When** any participant views the scoreboard, **Then** all participants show a score of 0.
-2. **Given** a guesser submits a correct guess, **When** the next poll completes, **Then** that guesser's score has increased by exactly 100 and all participants see the updated score.
+2. **Given** a guesser submits their first correct guess this round, **When** the next poll completes, **Then** that guesser's score has increased by exactly 100 and all participants see the updated score.
+5. **Given** a guesser has already submitted a correct guess this round, **When** they submit the correct answer again, **Then** the guess is accepted and recorded in history but their score does not change.
 3. **Given** a guesser submits an incorrect guess, **When** the next poll completes, **Then** their score is unchanged and all participants see no score change.
 4. **Given** guesses have been submitted, **When** any participant views the guess history, **Then** they see all guesses (correct and incorrect) in submission order with the submitter's name and correctness indicated.
 
@@ -79,11 +81,11 @@ Every participant's score starts at 0 when a round begins. A correct guess adds 
 ### Edge Cases
 
 - What if a guesser submits a guess with only Unicode whitespace (e.g., a non-breaking space)? — Treated as whitespace-only; rejected with the same message as a blank guess.
-- What if the same guesser submits the correct answer more than once? — Each correct submission is processed independently; the score increases by 100 on each correct guess. No duplicate-guess guard in scope.
+- What if the same guesser submits the correct answer more than once? — Only the first correct guess per player awards +100. Subsequent correct submissions from the same player are recorded in the guess history but score 0.
 - What if the drawer tries to submit a guess via a modified client request? — The server rejects it; the drawer's participantId matches the drawerId and is rejected with an error.
 - What if a participant's canvas image is large? — Accepted as-is; no server-side size cap in scope for a single-instance local game.
 - What if the drawing polling returns stale data due to a slow network? — The canvas reflects the most recent server-stored state on each successful poll. No special stale-data handling.
-- What if two guessers submit correct guesses simultaneously? — Both are accepted and both scores increase by 100. First-guesser advantage is a future feature.
+- What if two guessers submit correct guesses simultaneously? — Both are accepted and both scores increase by 100. Scoring is non-exclusive; first-guesser priority is a future feature.
 
 ## Requirements *(mandatory)*
 
@@ -97,7 +99,7 @@ Every participant's score starts at 0 when a round begins. A correct guess adds 
 - **FR-006**: The system MUST trim leading and trailing whitespace from guess text before any processing or comparison.
 - **FR-007**: The system MUST reject guesses that are empty or whitespace-only after trimming, and return a clear message to the guesser.
 - **FR-008**: The system MUST compare the trimmed guess text to the secret word case-insensitively.
-- **FR-009**: A correct guess MUST add exactly 100 points to the guesser's score.
+- **FR-009**: The first correct guess per player per round MUST add exactly 100 points to that player's score. Subsequent correct guesses from the same player in the same round MUST add 0 points.
 - **FR-010**: An incorrect guess MUST add 0 points (the guesser's score remains unchanged).
 - **FR-011**: All participant scores MUST be included in the room state returned by polling and visible to all participants.
 - **FR-012**: All submitted guesses (correct and incorrect) MUST be included in the room state returned by polling, visible to all participants in submission order.
@@ -124,9 +126,17 @@ Every participant's score starts at 0 when a round begins. A correct guess adds 
 
 - The round remains active until a future "end round" or "results" feature is implemented; a correct guess does not automatically end the round.
 - All participant scores start at 0 at round start (the score field is initialised when the round begins, not when the participant joins).
-- Guess attempts are unlimited; there is no cap on how many guesses a player may submit.
+- Guess attempts are unlimited in number; there is no cap on submissions. However, only the first correct guess per player per round awards +100 points — subsequent correct submissions from the same player score 0.
 - Canvas drawing uses a single default style (e.g., black stroke, fixed width); brush customisation (color, size) is out of scope.
 - The drawer is determined by the Scenario 2 flow (host is drawer for round 1); drawer rotation is out of scope.
 - The canvas state is held in-memory and is lost on server restart; persistence across restarts is out of scope.
 - The drawer's own canvas drawing is rendered locally on the drawer's device; it is also synced to the server so guessers can see it.
-- Multiplayer guess-collision handling (e.g., "first correct guesser wins") is a future feature; all correct guesses in scope are accepted independently.
+- Scoring is non-exclusive: all guessers who submit the correct answer score 100 points independently. First-guesser priority (only the first correct guesser scores) is a future feature.
+
+## Clarifications
+
+### Session 2026-06-19
+
+- Q: When multiple guessers submit the correct answer, do they all score or only the first? → A: All correct guessers score 100 independently; first-guesser priority is a future feature.
+- Q: Does a guesser who already answered correctly score +100 again on repeated correct submissions? → A: No — only the first correct guess per player per round awards +100; subsequent correct submissions score 0.
+- Q: After a correct guess, what state is the GuessForm in? → A: Input is cleared and a "Correct!" message is shown, then the input is re-enabled for further submissions.

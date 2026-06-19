@@ -31,4 +31,5 @@
 
 ## Notes
 
-All items pass. Spec is ready for `/speckit-clarify` or `/speckit-plan`.
+All items pass. Spec is ready for `/speckit-plan`.
+Clarification session (2026-06-19): 3 questions answered — scoring model (all guessers score independently), repeated-correct-guess behavior (unlimited +100), and GuessForm post-correct-guess UX (clear + "Correct!" + re-enable). All clarifications integrated into spec without introducing implementation details.
