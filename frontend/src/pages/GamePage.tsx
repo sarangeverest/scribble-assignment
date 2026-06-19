@@ -19,6 +19,13 @@ export function GamePage() {
     }
   }, [navigate, room]);
 
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      store.fetchRoom();
+    }, 2000);
+    return () => clearInterval(intervalId);
+  }, [store]);
+
   const isDrawer = participantId !== null && participantId === room?.drawerId;
 
   const handleClear = useCallback(() => {
